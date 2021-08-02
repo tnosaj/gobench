@@ -29,7 +29,7 @@ func (e ExecuteMySQL) ExecStatement(statement, label string) error {
 
 	_, err := e.Con.Exec(statement)
 	if err != nil {
-		e.Metrics.DBErrorReuests.WithLabelValues(label).Inc()
+		e.Metrics.DBErrorRequests.WithLabelValues(label).Inc()
 		return fmt.Errorf("could not execute %q with error %q", statement, err)
 	}
 	timer.ObserveDuration()
@@ -76,7 +76,7 @@ func (e ExecuteMySQL) ExecStatementWithReturnRow(statement, label string) (inter
 	q := e.Con.QueryRow(statement)
 
 	if err := q.Scan(&returnedRow); err != nil {
-		e.Metrics.DBErrorReuests.WithLabelValues(label).Inc()
+		e.Metrics.DBErrorRequests.WithLabelValues(label).Inc()
 		return internal.Row{}, fmt.Errorf("query %q failed: %q", statement, err)
 	}
 	timer.ObserveDuration()

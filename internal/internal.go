@@ -41,7 +41,7 @@ type Settings struct {
 // Metrics contsins all metric types
 type Metrics struct {
 	DBRequestDuration *prometheus.HistogramVec
-	DBErrorReuests    *prometheus.CounterVec
+	DBErrorRequests   *prometheus.CounterVec
 }
 
 // select * from sbtest1 where id=1\G
