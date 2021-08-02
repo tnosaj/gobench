@@ -25,5 +25,5 @@ func RegisterPrometheusMetrics() internal.Metrics {
 	prometheus.MustRegister(mysqlRequestDuration)
 	prometheus.MustRegister(mysqlErrorReuests)
 
-	return internal.Metrics{DBRequestDuration: mysqlRequestDuration, DBErrorReuests: mysqlErrorReuests}
+	return internal.Metrics{DBRequestDuration: mysqlRequestDuration, DBErrorRequests: mysqlErrorReuests}
 }
