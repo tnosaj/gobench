@@ -27,7 +27,7 @@ func main() {
 		s.DBConnectionInfo,
 		s.Connectionpoolsize,
 		metrics.RegisterPrometheusMetrics(),
-		s.Certificate)
+		s.TLSCerts)
 	if err != nil {
 		log.Fatalf("could not connect to db: %q", err)
 	}
@@ -42,6 +42,7 @@ func main() {
 
 	router := mux.NewRouter()
 	router.Handle("/metrics", promhttp.Handler())
+	//router.HandleFunc("/status", s.Status).Methods("GET")
 	work.Start(s)
 	log.Fatal(http.ListenAndServe(":"+s.Port, router))
 

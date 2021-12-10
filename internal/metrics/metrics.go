@@ -8,22 +8,22 @@ import (
 // RegisterPrometheusMetrics setsup metrics and returns them
 func RegisterPrometheusMetrics() internal.Metrics {
 
-	mysqlRequestDuration := prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Name:    "mysl_request_duration_seconds",
+	databaseRequestDuration := prometheus.NewHistogramVec(prometheus.HistogramOpts{
+		Name:    "database_request_duration_seconds",
 		Help:    "Histogram for the runtime of a simple primary key get function.",
-		Buckets: prometheus.LinearBuckets(0.00, 0.002, 50),
+		Buckets: prometheus.LinearBuckets(0.00, 0.002, 75),
 	}, []string{"query"})
 
-	mysqlErrorReuests := prometheus.NewCounterVec(
+	databaseErrorReuests := prometheus.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: "mysql_error_requests",
+			Name: "database_error_requests",
 			Help: "The total number of failed requests",
 		},
 		[]string{"method"},
 	)
 
-	prometheus.MustRegister(mysqlRequestDuration)
-	prometheus.MustRegister(mysqlErrorReuests)
+	prometheus.MustRegister(databaseRequestDuration)
+	prometheus.MustRegister(databaseErrorReuests)
 
-	return internal.Metrics{DBRequestDuration: mysqlRequestDuration, DBErrorRequests: mysqlErrorReuests}
+	return internal.Metrics{DBRequestDuration: databaseRequestDuration, DBErrorRequests: databaseErrorReuests}
 }

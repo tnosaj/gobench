@@ -12,13 +12,18 @@ func run(s internal.Settings, wp *workerPool) {
 	logrus.Infof("run")
 	maxIDCount := getMaxIDCount(s)
 	logrus.Infof("Query from 0 to %d", maxIDCount)
-	logrus.Infof("Running with a %d:%d::read:write split", s.ReadWriteSplit.Reads, s.ReadWriteSplit.Writes)
+	logrus.Infof("Running with a %d:%d::read:write split and strategy: %s", s.ReadWriteSplit.Reads, s.ReadWriteSplit.Writes, s.Strategy)
 
 	// Catch other strategies
 	var st internal.ExecutionStrategy
 	switch s.Strategy {
 	case "simple":
 		st = strategy.SimpleReadWrite{
+			S:          s,
+			MaxIDCount: maxIDCount,
+		}
+	case "insert":
+		st = strategy.InsertReadWrite{
 			S:          s,
 			MaxIDCount: maxIDCount,
 		}

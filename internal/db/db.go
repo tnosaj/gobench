@@ -5,7 +5,7 @@ import (
 )
 
 // Connect does the db magic connection
-func Connect(db string, connectionInfo internal.ConnectionInfo, poolsize int, metrics internal.Metrics, tls string) (internal.DB, error) {
+func Connect(db string, connectionInfo internal.ConnectionInfo, poolsize int, metrics internal.Metrics, tls internal.TLSCerts) (internal.DB, error) {
 	switch db {
 	case "mysql":
 		return connectMySQL(connectionInfo, poolsize, metrics, tls)

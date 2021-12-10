@@ -127,24 +127,32 @@ func (e ExecutePostSQL) Createable(dbName, tableName string) string {
 		"CREATE INDEX k_idx ON %s (k);", tableName, tableName)
 }
 
-func connectPostgreSQL(connectionInfo internal.ConnectionInfo, poolsize int, metrics internal.Metrics, tlsCert string) (*ExecutePostSQL, error) {
+func connectPostgreSQL(connectionInfo internal.ConnectionInfo, poolsize int, metrics internal.Metrics, tlsCerts internal.TLSCerts) (*ExecutePostSQL, error) {
 	logrus.Debugf("will connect to postgres")
 
-	psqlInfo := psqlInfoFromConnectionInfo(connectionInfo)
-	if tlsCert != "none" {
-		logrus.Infof("using tls with cert: %s", tlsCert)
+	var psqlInfo string
+	if tlsCerts.CaCertificate != "none" {
+		logrus.Infof("using tls with cert: %s", tlsCerts.CaCertificate)
 
-		_, err := ioutil.ReadFile(tlsCert)
+		_, err := ioutil.ReadFile(tlsCerts.CaCertificate)
 		if err != nil {
-			log.Fatalf("failed to read certificate file: %s", err)
+			logrus.Fatalf("failed to read certificate file: %s", err)
 		}
 
-		psqlInfo = psqlInfo + " sslmode=verify-full slrootcert=" + tlsCert
+		psqlInfo = psqlInfo + "sslmode=require sslrootcert=" + tlsCerts.CaCertificate
+		if tlsCerts.ClientCertificate != "none" {
+			psqlInfo = psqlInfo + " sslkey=" + tlsCerts.ClientKey + " sslcert=" + tlsCerts.ClientCertificate
+		}
 
 	} else {
-		psqlInfo = psqlInfo + " sslmode=disable"
+		psqlInfo = psqlInfo + "sslmode=disable"
 	}
-
+	//
+	// moved this to the end because I was
+	// having issues with passwords with
+	// special chars messing with ssl settings
+	//
+	psqlInfo = psqlInfo + " " + psqlInfoFromConnectionInfo(connectionInfo)
 	c, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
 		log.Fatalf("failed to open PostgreSQL connection: %s", err)

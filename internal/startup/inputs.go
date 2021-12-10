@@ -22,7 +22,9 @@ func EvaluateInputs() (internal.Settings, error) {
 	flag.StringVar(&s.TableName, "n", "sbtest", "Base table name")
 	flag.StringVar(&s.Port, "p", "8080", "Starts server on this port")
 	flag.StringVar(&s.Strategy, "strategy", "simple", "Strategy to use")
-	flag.StringVar(&s.Certificate, "cert", "none", "/path/to/certificate.pem if using tls")
+	flag.StringVar(&s.TLSCerts.CaCertificate, "cacert", "none", "/path/to/ca-certificate.pem if using tls")
+	flag.StringVar(&s.TLSCerts.ClientCertificate, "clientcert", "none", "/path/to/client-certificate.pem if using tls")
+	flag.StringVar(&s.TLSCerts.ClientKey, "clientkey", "none", "/path/to/client-key.key if using tls")
 	flag.StringVar(&s.DurationType, "duration", "events", "Duratation type - events|seconds")
 
 	flag.IntVar(&s.Concurrency, "t", 1, "Concurrent number of threads to run")
@@ -84,10 +86,12 @@ func EvaluateInputs() (internal.Settings, error) {
 		return internal.Settings{}, fmt.Errorf("Unknown db engine specified: %q", s.DB)
 	}
 
-	if s.Certificate != "none" {
-		_, err := ioutil.ReadFile(s.Certificate)
-		if err != nil {
-			return internal.Settings{}, fmt.Errorf("certificate set, but unreadable path: %q", err)
+	for _, tlsfile := range []string{s.TLSCerts.CaCertificate, s.TLSCerts.ClientCertificate, s.TLSCerts.ClientKey} {
+		if tlsfile != "none" {
+			_, err := ioutil.ReadFile(tlsfile)
+			if err != nil {
+				return internal.Settings{}, fmt.Errorf("%q set, but unreadable path: %q", tlsfile, err)
+			}
 		}
 	}
 

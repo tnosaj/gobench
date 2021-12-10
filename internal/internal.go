@@ -25,7 +25,6 @@ type Settings struct {
 	Debug bool
 
 	Action           string
-	Certificate      string
 	DB               string
 	DBConnectionInfo ConnectionInfo
 	DurationType     string
@@ -33,9 +32,16 @@ type Settings struct {
 	Strategy         string
 	TableName        string
 
+	TLSCerts TLSCerts
+
 	DBInterface    DB
 	ReadWriteSplit args.ReadWriteSplit
 	Randomizer     Random
+}
+type TLSCerts struct {
+	CaCertificate     string
+	ClientCertificate string
+	ClientKey         string
 }
 
 // Metrics contsins all metric types

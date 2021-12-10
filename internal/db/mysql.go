@@ -127,23 +127,38 @@ func (e ExecuteMySQL) Createable(dbName, tableName string) string {
 		"KEY k_1 (k)) ENGINE=InnoDB;", dbName, tableName)
 }
 
-func connectMySQL(connectionInfo internal.ConnectionInfo, poolsize int, metrics internal.Metrics, tlsCert string) (*ExecuteMySQL, error) {
+func connectMySQL(connectionInfo internal.ConnectionInfo, poolsize int, metrics internal.Metrics, tlsCerts internal.TLSCerts) (*ExecuteMySQL, error) {
 	logrus.Debugf("will connect to mysql")
 
 	DSN := dsnFromConnectionInfo(connectionInfo)
 
-	if tlsCert != "none" {
-		logrus.Infof("using tls with cert: %s", tlsCert)
+	if tlsCerts.CaCertificate != "none" {
+		logrus.Infof("using tls with cert: %s", tlsCerts.CaCertificate)
 		rootCertPool := x509.NewCertPool()
-		pem, err := ioutil.ReadFile(tlsCert)
+		pem, err := ioutil.ReadFile(tlsCerts.CaCertificate)
 		if err != nil {
-			log.Fatalf("failed to read certificate file: %s", err)
+			logrus.Fatalf("failed to read certificate file: %s", err)
 		}
 		if ok := rootCertPool.AppendCertsFromPEM(pem); !ok {
-			log.Fatalf("Failed to append PEM.")
+			logrus.Fatalf("Failed to append PEM.")
 		}
+
+		clientCert := make([]tls.Certificate, 0, 1)
+		var certs tls.Certificate
+
+		if tlsCerts.ClientCertificate != "none" {
+			certs, err = tls.LoadX509KeyPair(tlsCerts.ClientCertificate, tlsCerts.ClientKey)
+			if err != nil {
+				logrus.Fatal(err)
+			}
+		}
+
+		clientCert = append(clientCert, certs)
+
 		mysql.RegisterTLSConfig("custom", &tls.Config{
-			RootCAs: rootCertPool,
+			RootCAs:            rootCertPool,
+			Certificates:       clientCert,
+			InsecureSkipVerify: true, // needed for self signed certs
 		})
 		DSN = DSN + "?tls=custom"
 
