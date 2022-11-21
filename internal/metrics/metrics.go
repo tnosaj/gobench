@@ -11,7 +11,7 @@ func RegisterPrometheusMetrics() internal.Metrics {
 	databaseRequestDuration := prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Name:    "database_request_duration_seconds",
 		Help:    "Histogram for the runtime of a simple primary key get function.",
-		Buckets: prometheus.LinearBuckets(0.00, 0.002, 75),
+		Buckets: prometheus.LinearBuckets(0.01, 0.02, 75),
 	}, []string{"query"})
 
 	databaseErrorReuests := prometheus.NewCounterVec(
