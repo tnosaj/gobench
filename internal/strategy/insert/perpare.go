@@ -1,4 +1,4 @@
-package work
+package insert
 
 import (
 	"fmt"
@@ -16,14 +16,14 @@ import (
 // * sk index
 
 // Prepare stuff
-func prepare(s internal.Settings, wp *workerPool) {
+func (st InsertReadWrite) Prepare() {
 	logrus.Infof("prepare")
 
-	err := createTable(s)
+	err := createTable(st.S)
 	if err != nil {
-		logrus.Errorf("Error when creating table '%s.%s': %q", s.DBConnectionInfo.DBName, s.TableName, err)
+		logrus.Errorf("Error when creating table '%s.%s': %q", st.S.DBConnectionInfo.DBName, st.S.TableName, err)
 	}
-	bulkInsert(s)
+	bulkInsert(st.S)
 	logrus.Infof("Done, please end with ctl+c")
 }
 
@@ -54,7 +54,7 @@ func bulkInsert(s internal.Settings) {
 		go func() {
 			defer wg.Done()
 			for range ch {
-				err := insert(s)
+				err := dbinsert(s)
 				if err != nil {
 					logrus.Warnf("Error inserting: %s", err)
 				}
@@ -69,7 +69,7 @@ func bulkInsert(s internal.Settings) {
 	wg.Wait()
 }
 
-func insert(s internal.Settings) error {
+func dbinsert(s internal.Settings) error {
 	r := helper.GenerateRow(s.Randomizer)
 	err := s.DBInterface.ExecStatement("INSERT INTO "+s.TableName+"(k, c , pad) VALUES ("+strconv.Itoa(r.K)+",'"+r.C+"','"+r.Pad+"');", "blkinsert")
 	if err != nil {

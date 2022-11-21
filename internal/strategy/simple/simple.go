@@ -1,4 +1,4 @@
-package strategy
+package simple
 
 import (
 	"strconv"
@@ -14,8 +14,23 @@ type SimpleReadWrite struct {
 	MaxIDCount int
 }
 
+func MakeSimpleReadWriteStrategy(s internal.Settings) SimpleReadWrite {
+
+	count, err := s.DBInterface.ExecStatementWithReturnInt("select count(id) from " + s.TableName + ";")
+
+	if err != nil {
+		logrus.Fatalf("could not get max id count with error: %q", err)
+	}
+	logrus.Infof("Query from 0 to %d", count)
+
+	return SimpleReadWrite{
+		S:          s,
+		MaxIDCount: count,
+	}
+}
+
 // CreateCommand do stuffs
-func (st SimpleReadWrite) CreateCommand() (string, string) {
+func (st SimpleReadWrite) RunCommand() {
 	x := st.S.Randomizer.Intn(100)
 	// x:50  - 50
 	// r:100 - 0
@@ -23,10 +38,10 @@ func (st SimpleReadWrite) CreateCommand() (string, string) {
 	switch {
 	case x <= st.S.ReadWriteSplit.Reads:
 		logrus.Debugf("Will perform read")
-		return st.read()
+		st.S.DBInterface.ExecStatement(st.read())
 	default:
 		logrus.Debugf("Will perform write")
-		return st.write()
+		st.S.DBInterface.ExecStatement(st.write())
 	}
 
 }

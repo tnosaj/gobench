@@ -1,4 +1,4 @@
-package work
+package insert
 
 import (
 	"fmt"
@@ -7,9 +7,9 @@ import (
 	"gitlab.otters.xyz/jason.tevnan/gobench/internal"
 )
 
-func cleanup(s internal.Settings, wp *workerPool) {
+func (st InsertReadWrite) Cleanup() {
 	logrus.Infof("cleanup")
-	err := dropTable(s)
+	err := dropTable(st.S)
 	if err != nil {
 		logrus.Fatalf("Error when dropping table: %s", err)
 	}

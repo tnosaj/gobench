@@ -20,8 +20,9 @@ type Settings struct {
 	DBConnectionInfo db.ConnectionInfo
 	DurationType     string
 	Port             string
-	Strategy         string
 	TableName        string
+
+	Strategy string
 
 	TLSCerts db.TLSCerts
 
