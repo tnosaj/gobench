@@ -14,18 +14,23 @@ type SimpleReadWrite struct {
 	MaxIDCount int
 }
 
-func MakeSimpleReadWriteStrategy(s internal.Settings) SimpleReadWrite {
+func MakeSimpleReadWriteStrategy(s internal.Settings, action string) SimpleReadWrite {
+	logrus.Info("creating SimpleReadWrite")
 
-	count, err := s.DBInterface.ExecStatementWithReturnInt("select count(id) from " + s.TableName + ";")
+	if action == "run" {
+		count, err := s.DBInterface.ExecStatementWithReturnInt("select count(id) from " + s.TableName + ";")
 
-	if err != nil {
-		logrus.Fatalf("could not get max id count with error: %q", err)
+		if err != nil {
+			logrus.Fatalf("could not get max id count with error: %q", err)
+		}
+		logrus.Infof("Query from 0 to %d", count)
+		return SimpleReadWrite{
+			S:          s,
+			MaxIDCount: count,
+		}
 	}
-	logrus.Infof("Query from 0 to %d", count)
-
 	return SimpleReadWrite{
-		S:          s,
-		MaxIDCount: count,
+		S: s,
 	}
 }
 

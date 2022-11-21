@@ -1,6 +1,10 @@
 package db
 
-import "github.com/prometheus/client_golang/prometheus"
+import (
+	"database/sql"
+
+	"github.com/prometheus/client_golang/prometheus"
+)
 
 // Row of work
 type Row struct {
@@ -46,7 +50,7 @@ type DB interface {
 }
 
 // Connect does the db magic connection
-func Connect(db string, connectionInfo ConnectionInfo, poolsize int, tls TLSCerts) (DB, error) {
+func Connect(db string, connectionInfo ConnectionInfo, poolsize int, tls TLSCerts) (DB, *sql.DB, error) {
 	databaseRequestDuration := prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Name:    "database_request_duration_seconds",
 		Help:    "Histogram for the runtime of a simple primary key get function.",
@@ -79,7 +83,7 @@ func Connect(db string, connectionInfo ConnectionInfo, poolsize int, tls TLSCert
 		return ExecuteNull{Metrics: Metrics{
 			DBRequestDuration: databaseRequestDuration,
 			DBErrorRequests:   databaseErrorReuests,
-		}}, nil
+		}}, nil, nil
 
 	}
 }

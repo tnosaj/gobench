@@ -126,7 +126,7 @@ func (e ExecutePostSQL) Createable(dbName, tableName string) string {
 		"CREATE INDEX k_idx ON %s (k);", tableName, tableName)
 }
 
-func connectPostgreSQL(connectionInfo ConnectionInfo, poolsize int, metrics Metrics, tlsCerts TLSCerts) (*ExecutePostSQL, error) {
+func connectPostgreSQL(connectionInfo ConnectionInfo, poolsize int, metrics Metrics, tlsCerts TLSCerts) (*ExecutePostSQL, *sql.DB, error) {
 	logrus.Debugf("will connect to postgres")
 
 	var psqlInfo string
@@ -160,7 +160,7 @@ func connectPostgreSQL(connectionInfo ConnectionInfo, poolsize int, metrics Metr
 	c.SetMaxIdleConns(poolsize)
 	c.SetMaxOpenConns(poolsize)
 	c.SetConnMaxLifetime(360 * time.Second)
-	return &ExecutePostSQL{Con: c, Metrics: metrics}, nil
+	return &ExecutePostSQL{Con: c, Metrics: metrics}, c, nil
 }
 
 func psqlInfoFromConnectionInfo(connectionInfo ConnectionInfo) string {

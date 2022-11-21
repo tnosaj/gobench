@@ -21,13 +21,14 @@ func main() {
 		log.Fatalf("could not evaluate inputs: %q", err)
 	}
 
-	connectionInterface, err := db.Connect(s.DB,
+	connectionInterface, connection, err := db.Connect(s.DB,
 		s.DBConnectionInfo,
 		s.Connectionpoolsize,
 		s.TLSCerts)
 	if err != nil {
 		log.Fatalf("could not connect to db: %q", err)
 	}
+	s.DBConnection = connection
 	s.DBInterface = connectionInterface
 
 	if err := connectionInterface.Ping(); err != nil {

@@ -14,15 +14,17 @@ type InsertReadWrite struct {
 	MaxIDCount int
 }
 
-func MakeInsertReadWriteStrategy(s internal.Settings) InsertReadWrite {
+func MakeInsertReadWriteStrategy(s internal.Settings, action string) InsertReadWrite {
+	logrus.Info("creating InsertReadWrite")
+	var count int
+	if action == "run" {
+		count, err := s.DBInterface.ExecStatementWithReturnInt("select count(id) from " + s.TableName + ";")
 
-	count, err := s.DBInterface.ExecStatementWithReturnInt("select count(id) from " + s.TableName + ";")
-
-	if err != nil {
-		logrus.Fatalf("could not get max id count with error: %q", err)
+		if err != nil {
+			logrus.Fatalf("could not get max id count with error: %q", err)
+		}
+		logrus.Infof("Query from 0 to %d", count)
 	}
-	logrus.Infof("Query from 0 to %d", count)
-
 	return InsertReadWrite{
 		S:          s,
 		MaxIDCount: count,

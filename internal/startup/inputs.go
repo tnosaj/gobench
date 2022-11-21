@@ -127,7 +127,7 @@ func getEnvVar(envVarName string) (string, error) {
 }
 
 func setupLogger(debug bool) {
-	logrus.SetReportCaller(true)
+	//logrus.SetReportCaller(true)
 	logrus.SetFormatter(&logrus.TextFormatter{
 		FullTimestamp: true,
 	})

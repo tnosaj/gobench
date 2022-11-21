@@ -1,6 +1,8 @@
 package internal
 
 import (
+	"database/sql"
+
 	"gitlab.otters.xyz/jason.tevnan/gobench/internal/db"
 	"gitlab.otters.xyz/jason.tevnan/gobench/pkg/args"
 )
@@ -17,6 +19,7 @@ type Settings struct {
 
 	Action           string
 	DB               string
+	DBConnection     *sql.DB
 	DBConnectionInfo db.ConnectionInfo
 	DurationType     string
 	Port             string

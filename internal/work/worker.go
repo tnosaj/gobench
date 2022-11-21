@@ -25,17 +25,20 @@ func Start(s internal.Settings) {
 
 	switch s.Strategy {
 	case "simple":
-		st = simple.MakeSimpleReadWriteStrategy(s)
+		st = simple.MakeSimpleReadWriteStrategy(s, s.Action)
 	case "insert":
-		st = insert.MakeInsertReadWriteStrategy(s)
+		st = insert.MakeInsertReadWriteStrategy(s, s.Action)
 	}
 
 	switch s.Action {
 	case "prepare":
+		logrus.Info("running prepare")
 		go st.Prepare()
 	case "run":
+		logrus.Info("running run")
 		go run(s, wp, st)
 	case "cleanup":
+		logrus.Info("running cleanup")
 		go st.Cleanup()
 	}
 }
