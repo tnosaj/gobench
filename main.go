@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"time"
 
-	_ "github.com/go-sql-driver/mysql"
 	log "github.com/sirupsen/logrus"
 	"gitlab.otters.xyz/jason.tevnan/gobench/internal/db"
 	"gitlab.otters.xyz/jason.tevnan/gobench/internal/metrics"
