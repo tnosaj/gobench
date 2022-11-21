@@ -12,13 +12,12 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
-	"gitlab.otters.xyz/jason.tevnan/gobench/internal"
 )
 
 // ExecutePostSQL contains the connection and metrics to track executions
 type ExecutePostSQL struct {
 	Con     *sql.DB
-	Metrics internal.Metrics
+	Metrics Metrics
 }
 
 // ExecStatement will execute a statement 's' and track it under the label 'l'
@@ -66,17 +65,17 @@ func (e ExecutePostSQL) ExecStatementWithReturnInt(statement string) (int, error
 }
 
 // ExecStatementWithReturnRow will execute a statement 's', track it under the label 'l' and return the resulting Row
-func (e ExecutePostSQL) ExecStatementWithReturnRow(statement, label string) (internal.Row, error) {
+func (e ExecutePostSQL) ExecStatementWithReturnRow(statement, label string) (Row, error) {
 	logrus.Debugf("will execut %q", statement)
 
 	timer := prometheus.NewTimer(e.Metrics.DBRequestDuration.WithLabelValues(label))
-	var returnedRow internal.Row
+	var returnedRow Row
 
 	q := e.Con.QueryRow(statement)
 
 	if err := q.Scan(&returnedRow); err != nil {
 		e.Metrics.DBErrorRequests.WithLabelValues(label).Inc()
-		return internal.Row{}, fmt.Errorf("query %q failed: %q", statement, err)
+		return Row{}, fmt.Errorf("query %q failed: %q", statement, err)
 	}
 	timer.ObserveDuration()
 
@@ -127,7 +126,7 @@ func (e ExecutePostSQL) Createable(dbName, tableName string) string {
 		"CREATE INDEX k_idx ON %s (k);", tableName, tableName)
 }
 
-func connectPostgreSQL(connectionInfo internal.ConnectionInfo, poolsize int, metrics internal.Metrics, tlsCerts internal.TLSCerts) (*ExecutePostSQL, error) {
+func connectPostgreSQL(connectionInfo ConnectionInfo, poolsize int, metrics Metrics, tlsCerts TLSCerts) (*ExecutePostSQL, error) {
 	logrus.Debugf("will connect to postgres")
 
 	var psqlInfo string
@@ -164,7 +163,7 @@ func connectPostgreSQL(connectionInfo internal.ConnectionInfo, poolsize int, met
 	return &ExecutePostSQL{Con: c, Metrics: metrics}, nil
 }
 
-func psqlInfoFromConnectionInfo(connectionInfo internal.ConnectionInfo) string {
+func psqlInfoFromConnectionInfo(connectionInfo ConnectionInfo) string {
 	return fmt.Sprintf("user=%s password=%s host=%s port=%s dbname=%s",
 		connectionInfo.User,
 		connectionInfo.Password,

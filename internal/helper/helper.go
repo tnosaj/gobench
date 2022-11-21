@@ -2,11 +2,12 @@ package helper
 
 import (
 	"gitlab.otters.xyz/jason.tevnan/gobench/internal"
+	"gitlab.otters.xyz/jason.tevnan/gobench/internal/db"
 )
 
 // GenerateRow returns a row
-func GenerateRow(rand internal.Random) internal.Row {
-	return internal.Row{
+func GenerateRow(rand internal.Random) db.Row {
+	return db.Row{
 		K:   rand.Intn(2147483647),
 		C:   randomString(120, rand),
 		Pad: randomString(60, rand),

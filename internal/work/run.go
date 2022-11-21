@@ -15,7 +15,7 @@ func run(s internal.Settings, wp *workerPool) {
 	logrus.Infof("Running with a %d:%d::read:write split and strategy: %s", s.ReadWriteSplit.Reads, s.ReadWriteSplit.Writes, s.Strategy)
 
 	// Catch other strategies
-	var st internal.ExecutionStrategy
+	var st strategy.ExecutionStrategy
 	switch s.Strategy {
 	case "simple":
 		st = strategy.SimpleReadWrite{
@@ -29,7 +29,7 @@ func run(s internal.Settings, wp *workerPool) {
 		}
 	}
 
-	var runner internal.ExecutionType
+	var runner ExecutionType
 	switch s.DurationType {
 	case "events":
 		runner = RunForEventCount{
@@ -61,7 +61,7 @@ type RunForEventCount struct {
 	s          internal.Settings
 	maxIDCount int
 	wp         *workerPool
-	st         internal.ExecutionStrategy
+	st         strategy.ExecutionStrategy
 }
 
 // Run for a number of events

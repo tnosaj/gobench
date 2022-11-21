@@ -13,13 +13,12 @@ import (
 	"github.com/go-sql-driver/mysql"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
-	"gitlab.otters.xyz/jason.tevnan/gobench/internal"
 )
 
 // ExecuteMySQL contains the connection and metrics to track executions
 type ExecuteMySQL struct {
 	Con     *sql.DB
-	Metrics internal.Metrics
+	Metrics Metrics
 }
 
 // ExecStatement will execute a statement 's' and track it under the label 'l'
@@ -67,17 +66,17 @@ func (e ExecuteMySQL) ExecStatementWithReturnInt(statement string) (int, error) 
 }
 
 // ExecStatementWithReturnRow will execute a statement 's', track it under the label 'l' and return the resulting Row
-func (e ExecuteMySQL) ExecStatementWithReturnRow(statement, label string) (internal.Row, error) {
+func (e ExecuteMySQL) ExecStatementWithReturnRow(statement, label string) (Row, error) {
 	logrus.Debugf("will execut %q", statement)
 
 	timer := prometheus.NewTimer(e.Metrics.DBRequestDuration.WithLabelValues(label))
-	var returnedRow internal.Row
+	var returnedRow Row
 
 	q := e.Con.QueryRow(statement)
 
 	if err := q.Scan(&returnedRow); err != nil {
 		e.Metrics.DBErrorRequests.WithLabelValues(label).Inc()
-		return internal.Row{}, fmt.Errorf("query %q failed: %q", statement, err)
+		return Row{}, fmt.Errorf("query %q failed: %q", statement, err)
 	}
 	timer.ObserveDuration()
 
@@ -127,7 +126,7 @@ func (e ExecuteMySQL) Createable(dbName, tableName string) string {
 		"KEY k_1 (k)) ENGINE=InnoDB;", dbName, tableName)
 }
 
-func connectMySQL(connectionInfo internal.ConnectionInfo, poolsize int, metrics internal.Metrics, tlsCerts internal.TLSCerts) (*ExecuteMySQL, error) {
+func connectMySQL(connectionInfo ConnectionInfo, poolsize int, metrics Metrics, tlsCerts TLSCerts) (*ExecuteMySQL, error) {
 	logrus.Debugf("will connect to mysql")
 
 	DSN := dsnFromConnectionInfo(connectionInfo)
@@ -175,7 +174,7 @@ func connectMySQL(connectionInfo internal.ConnectionInfo, poolsize int, metrics 
 	return &ExecuteMySQL{Con: c, Metrics: metrics}, nil
 }
 
-func dsnFromConnectionInfo(connectionInfo internal.ConnectionInfo) string {
+func dsnFromConnectionInfo(connectionInfo ConnectionInfo) string {
 	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s",
 		connectionInfo.User,
 		connectionInfo.Password,

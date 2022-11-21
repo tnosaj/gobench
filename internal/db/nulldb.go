@@ -4,12 +4,11 @@ import (
 	"fmt"
 
 	"github.com/sirupsen/logrus"
-	"gitlab.otters.xyz/jason.tevnan/gobench/internal"
 )
 
 // ExecuteNull contains nothing
 type ExecuteNull struct {
-	Metrics internal.Metrics
+	Metrics Metrics
 }
 
 // ExecStatement will log statement
@@ -31,9 +30,9 @@ func (e ExecuteNull) ExecStatementWithReturnInt(statement string) (int, error) {
 }
 
 // ExecStatementWithReturnRow will execute a statement 's' and return the resulting Row
-func (e ExecuteNull) ExecStatementWithReturnRow(statement, label string) (internal.Row, error) {
+func (e ExecuteNull) ExecStatementWithReturnRow(statement, label string) (Row, error) {
 	logrus.Infof("executing %q with label %q", statement, label)
-	return internal.Row{ID: 1337, K: 1338, C: "", Pad: ""}, nil
+	return Row{ID: 1337, K: 1338, C: "", Pad: ""}, nil
 }
 
 // ExecDDLStatement will execute a statement 's' as a DDL

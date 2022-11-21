@@ -7,7 +7,6 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.otters.xyz/jason.tevnan/gobench/internal/db"
-	"gitlab.otters.xyz/jason.tevnan/gobench/internal/metrics"
 	"gitlab.otters.xyz/jason.tevnan/gobench/internal/startup"
 	"gitlab.otters.xyz/jason.tevnan/gobench/internal/work"
 
@@ -25,7 +24,6 @@ func main() {
 	connectionInterface, err := db.Connect(s.DB,
 		s.DBConnectionInfo,
 		s.Connectionpoolsize,
-		metrics.RegisterPrometheusMetrics(),
 		s.TLSCerts)
 	if err != nil {
 		log.Fatalf("could not connect to db: %q", err)

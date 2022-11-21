@@ -8,6 +8,11 @@ import (
 	"gitlab.otters.xyz/jason.tevnan/gobench/internal"
 )
 
+// ExecutionType defines how long queries are run
+type ExecutionType interface {
+	Run()
+}
+
 // Start running
 func Start(s internal.Settings) {
 
