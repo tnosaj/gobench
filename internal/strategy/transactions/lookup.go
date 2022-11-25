@@ -2,9 +2,6 @@ package transactions
 
 import "github.com/sirupsen/logrus"
 
-// customer_tin_validation_outcome
-// customer_tin_validation_error_reason
-// customer_tin_validation_request_datetime
 func (st TransactionReadWrite) createLookupEvent(txid string) {
 	query := `INSERT INTO lookupevents ()
 	VALUES ($1, $2, $3, $4)`

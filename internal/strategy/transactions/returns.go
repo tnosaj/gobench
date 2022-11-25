@@ -2,9 +2,6 @@ package transactions
 
 import "github.com/sirupsen/logrus"
 
-// returns_filing_id
-// returns_filing_status
-// returns_filing_deadline
 func (st TransactionReadWrite) createReturnsEvent(txid string) {
 	query := `INSERT INTO returnsevents ()
 	VALUES ($1, $2, $3, $4)`

@@ -2,12 +2,6 @@ package transactions
 
 import "github.com/sirupsen/logrus"
 
-// invoicing_number_of_documents
-// invoicing_document_created_datetime
-// invoicing_document_number
-// invoicing_document_status
-// invoicing_exception_reason
-// invoicing_document_attachment (pdf/html)
 func (st TransactionReadWrite) createInvoicingEvent(txid string) {
 	query := `INSERT INTO invoicingevents ()
 VALUES ($1, $2, $3, $4)`

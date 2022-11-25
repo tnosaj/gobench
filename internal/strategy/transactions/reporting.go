@@ -2,18 +2,6 @@ package transactions
 
 import "github.com/sirupsen/logrus"
 
-// reporting_transaction_reported_datetime
-// reporting_status
-// reporting_reference_id
-// reporting_job_id
-// reporting_error_count
-// reporting_error_datetime
-// reporting_error_type
-// reporting_error_code
-// reporting_error_message
-// reporting_error_field
-// reporting_error_status
-// reporting_request_json
 func (st TransactionReadWrite) createReportingEvent(txid string) {
 	query := `INSERT INTO reportingevents ()
 		VALUES ($1, $2, $3, $4)`

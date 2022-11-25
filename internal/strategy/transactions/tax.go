@@ -2,8 +2,6 @@ package transactions
 
 import "github.com/sirupsen/logrus"
 
-// tax_calculation_request_datetime
-// tax_logic_label
 func (st TransactionReadWrite) createTaxEvent(txid string) {
 	query := `INSERT INTO taxevents ()
 VALUES ($1, $2, $3, $4)`
