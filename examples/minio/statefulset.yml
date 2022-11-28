@@ -1,0 +1,63 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: minio
+spec:
+  selector:
+    matchLabels:
+      app: minio
+  replicas: 1
+  serviceName: minio
+  volumeClaimTemplates:
+  - metadata:
+      name: storage
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 10Gi
+  template:
+    metadata:
+      labels:
+        app: minio
+    spec:
+      containers:
+      - name: minio
+        image: "minio/minio:latest"
+        args:
+        - server
+        - /storage
+        - --console-address
+        - :9001
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: MINIO_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: minio
+              key: accesskey
+        - name: MINIO_API_READY_DEADLINE
+          value: "5s"
+        - name: MINIO_REGION_NAME
+          value: "us-east-1"
+        - name: MINIO_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: minio
+              key: secretkey
+        - name: MINIO_PROMETHEUS_AUTH_TYPE
+          value: public
+        ports:
+        - name: api
+          containerPort: 9000
+          hostPort: 9000
+          protocol: TCP
+        - name: web
+          containerPort: 9000
+          hostPort: 9000
+          protocol: TCP
+        volumeMounts:
+        - name: storage
+          mountPath: /storage

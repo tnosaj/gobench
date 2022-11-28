@@ -1,0 +1,51 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gobench
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gobench
+  template:
+    metadata:
+      labels:
+        app: gobench
+    spec:
+      containers:
+      - name: gobench
+        image: tnosaj/gobench
+        env:
+        - name: DBUSER
+          valueFrom:
+            secretKeyRef:
+              name: cluster-example-custom-app
+              key: username
+        - name: DBPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: cluster-example-custom-app
+              key: password
+        - name: DBHOSTNAME
+          value: "cluster-example-custom-rw.default"
+        - name: DBNAME
+          value: "sbtest"
+        - name: DBPORT
+          value: "5432"
+        - name: DBENGINE
+          value: "postgres"
+        ports:
+        - name: web
+          containerPort: 8080
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: gobench
+spec:
+  selector:
+    matchLabels:
+      app: gobench
+  podMetricsEndpoints:
+  - port: web
