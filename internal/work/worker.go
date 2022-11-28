@@ -40,6 +40,8 @@ func Start(s internal.Settings) {
 	case "cleanup":
 		logrus.Info("running cleanup")
 		go st.Cleanup()
+	default:
+		logrus.Errorf("unknown action: %s", s.Action)
 	}
 }
 

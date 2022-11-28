@@ -95,14 +95,14 @@ func EvaluateInputs() (internal.Settings, error) {
 		}
 	}
 
-	acceptedActions := map[string]bool{
-		"prepare": true,
-		"run":     true,
-		"cleanup": true,
-	}
-	if !acceptedActions[s.Action] {
-		return internal.Settings{}, fmt.Errorf("Action %q is not one of the following: prepare, run, cleanup", s.Action)
-	}
+	// acceptedActions := map[string]bool{
+	// 	"prepare": true,
+	// 	"run":     true,
+	// 	"cleanup": true,
+	// }
+	// if !acceptedActions[s.Action] {
+	// 	return internal.Settings{}, fmt.Errorf("Action %q is not one of the following: prepare, run, cleanup", s.Action)
+	// }
 
 	acceptedDurationTypes := map[string]bool{
 		"events":  true,
@@ -119,10 +119,10 @@ func EvaluateInputs() (internal.Settings, error) {
 
 func getEnvVar(envVarName string) (string, error) {
 	check := os.Getenv(envVarName)
-	if check == "" {
-		printRequiredEnvVars()
-		return "", fmt.Errorf("Missing env var %q", envVarName)
-	}
+	// if check == "" {
+	// 	printRequiredEnvVars()
+	// 	return "", fmt.Errorf("Missing env var %q", envVarName)
+	// }
 	return check, nil
 }
 

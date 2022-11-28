@@ -24,7 +24,7 @@ func (st SimpleReadWrite) Prepare() {
 		logrus.Errorf("Error when creating table '%s.%s': %q", st.S.DBConnectionInfo.DBName, st.S.TableName, err)
 	}
 	bulkInsert(st.S)
-	logrus.Infof("Done, please end with ctl+c")
+	logrus.Infof("Done")
 }
 
 func createTable(s internal.Settings) error {

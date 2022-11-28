@@ -7,8 +7,8 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.otters.xyz/jason.tevnan/gobench/internal/db"
+	"gitlab.otters.xyz/jason.tevnan/gobench/internal/server"
 	"gitlab.otters.xyz/jason.tevnan/gobench/internal/startup"
-	"gitlab.otters.xyz/jason.tevnan/gobench/internal/work"
 
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -38,10 +38,14 @@ func main() {
 	// Generate seedyness
 	rand.New(rand.NewSource(time.Now().UnixNano()))
 
+	server := server.NewGobenchServer(s)
+
 	router := mux.NewRouter()
 	router.Handle("/metrics", promhttp.Handler())
-	//router.HandleFunc("/status", s.Status).Methods("GET")
-	work.Start(s)
+	router.HandleFunc("/status", server.Status).Methods("GET")
+	router.HandleFunc("/prepare", server.Prepare).Methods("POST")
+	router.HandleFunc("/run", server.Run).Methods("POST")
+	router.HandleFunc("/cleanup", server.Cleanup).Methods("POST")
 	log.Fatal(http.ListenAndServe(":"+s.Port, router))
 
 }

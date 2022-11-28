@@ -14,7 +14,7 @@ func (st SimpleReadWrite) Cleanup() {
 		logrus.Fatalf("Error when dropping table: %s", err)
 	}
 
-	logrus.Infof("Done, please end with ctl+c")
+	logrus.Infof("Done")
 }
 
 func dropTable(s internal.Settings) error {
