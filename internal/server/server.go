@@ -10,7 +10,6 @@ type GobenchServer struct {
 }
 
 type HttpSettings struct {
-	Action          string `json:"action"`
 	TableName       string `json:"tablename"`
 	Strategy        string `json:"strategy"`
 	Concurrency     int    `json:"concurrency"`

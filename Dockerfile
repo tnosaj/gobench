@@ -19,10 +19,9 @@ FROM alpine:3
 WORKDIR /
 
 COPY --from=build /gobench /gobench
-COPY entrypoint.sh /entrypoint.sh
 
 #RUN apk add --no-cache \
 #        musl
 #
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/gobench"]
 
