@@ -10,12 +10,12 @@ type GobenchServer struct {
 }
 
 type HttpSettings struct {
-	TableName       string `json:"tablename"`
-	Strategy        string `json:"strategy"`
-	Concurrency     int    `json:"concurrency"`
-	Initialdatasize int    `json:"initialdatasize"`
-	Duration        int    `json:"duration"`
-	Rate            int    `json:"rate"`
+	SqlMigrationFolder string `json:"sqlmigrationfolder"`
+	Strategy           string `json:"strategy"`
+	Concurrency        int    `json:"concurrency"`
+	Initialdatasize    int    `json:"initialdatasize"`
+	Duration           int    `json:"duration"`
+	Rate               int    `json:"rate"`
 }
 
 func NewGobenchServer(settings internal.Settings) GobenchServer {

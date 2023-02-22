@@ -45,8 +45,8 @@ type DB interface {
 	Ping() error
 
 	// DB sepecific queries
-	GetTableExists(dbName, tableName string) string
-	Createable(dbName, tableName string) string
+	AutoMigrateUP(folder string) error
+	AutoMigrateDown(folder string) error
 }
 
 // Connect does the db magic connection

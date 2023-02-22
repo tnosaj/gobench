@@ -59,8 +59,8 @@ func (s *GobenchServer) unifySettings(r *http.Request, action string) (internal.
 	}
 
 	settings.Action = action
-	if httpsettings.TableName != "" {
-		settings.TableName = httpsettings.TableName
+	if httpsettings.SqlMigrationFolder != "" {
+		settings.SqlMigrationFolder = httpsettings.SqlMigrationFolder
 	}
 	if httpsettings.Strategy != "" {
 		settings.Strategy = httpsettings.Strategy

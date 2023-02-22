@@ -12,13 +12,15 @@ import (
 type InsertReadWrite struct {
 	S          internal.Settings
 	MaxIDCount int
+	TableName  string
 }
 
 func MakeInsertReadWriteStrategy(s internal.Settings, action string) InsertReadWrite {
 	logrus.Info("creating InsertReadWrite")
+	tableName := "sbtest"
 	var count int
 	if action == "run" {
-		count, err := s.DBInterface.ExecStatementWithReturnInt("select count(id) from " + s.TableName + ";")
+		count, err := s.DBInterface.ExecStatementWithReturnInt("select count(id) from " + tableName + ";")
 
 		if err != nil {
 			logrus.Fatalf("could not get max id count with error: %q", err)
@@ -28,6 +30,7 @@ func MakeInsertReadWriteStrategy(s internal.Settings, action string) InsertReadW
 	return InsertReadWrite{
 		S:          s,
 		MaxIDCount: count,
+		TableName:  tableName,
 	}
 }
 
@@ -67,28 +70,28 @@ func (st InsertReadWrite) write() (string, string) {
 
 // select by primary key
 func (st InsertReadWrite) getPk() string {
-	return "select id,k,c,pad from " + st.S.TableName + " where id=" + strconv.Itoa(st.S.Randomizer.Intn(st.MaxIDCount)) + ";"
+	return "select id,k,c,pad from " + st.TableName + " where id=" + strconv.Itoa(st.S.Randomizer.Intn(st.MaxIDCount)) + ";"
 }
 
 // select by secondary key
 func (st InsertReadWrite) getSk() string {
-	return "select id,k,c,pad from " + st.S.TableName + " where k=" + strconv.Itoa(st.S.Randomizer.Intn(2147483647)) + ";"
+	return "select id,k,c,pad from " + st.TableName + " where k=" + strconv.Itoa(st.S.Randomizer.Intn(2147483647)) + ";"
 }
 
 // insert one record
 func (st InsertReadWrite) create() string {
 	r := helper.GenerateRow(st.S.Randomizer)
-	return "INSERT INTO " + st.S.TableName + "(k, c , pad) VALUES (" + strconv.Itoa(r.K) + ",'" + r.C + "','" + r.Pad + "');"
+	return "INSERT INTO " + st.TableName + "(k, c , pad) VALUES (" + strconv.Itoa(r.K) + ",'" + r.C + "','" + r.Pad + "');"
 
 }
 
 // update one record
 func (st InsertReadWrite) update() string {
 	r := helper.GenerateRow(st.S.Randomizer)
-	return "UPDATE " + st.S.TableName + " SET c='" + r.C + "', pad='" + r.Pad + "' WHERE id=" + strconv.Itoa(st.S.Randomizer.Intn(st.MaxIDCount)) + ";"
+	return "UPDATE " + st.TableName + " SET c='" + r.C + "', pad='" + r.Pad + "' WHERE id=" + strconv.Itoa(st.S.Randomizer.Intn(st.MaxIDCount)) + ";"
 }
 
 // delete one record
 func (st InsertReadWrite) delete() string {
-	return "DELETE FROM " + st.S.TableName + " WHERE id=" + strconv.Itoa(st.S.Randomizer.Intn(st.MaxIDCount)) + ";"
+	return "DELETE FROM " + st.TableName + " WHERE id=" + strconv.Itoa(st.S.Randomizer.Intn(st.MaxIDCount)) + ";"
 }

@@ -1,0 +1,7 @@
+CREATE TABLE sbtest ( 
+  id SERIAL PRIMARY KEY, 
+  k integer NOT NULL DEFAULT '0', 
+  c VARCHAR NOT NULL DEFAULT '', 
+  pad VARCHAR NOT NULL DEFAULT ''
+); 
+CREATE INDEX k_idx ON sbtest (k);

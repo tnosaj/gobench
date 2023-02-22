@@ -19,33 +19,15 @@ import (
 func (st InsertReadWrite) Prepare() {
 	logrus.Infof("prepare")
 
-	err := createTable(st.S)
+	err := st.S.DBInterface.AutoMigrateUP(fmt.Sprintf("%s/insert", st.S.SqlMigrationFolder))
 	if err != nil {
-		logrus.Errorf("Error when creating table '%s.%s': %q", st.S.DBConnectionInfo.DBName, st.S.TableName, err)
+		logrus.Errorf("Error when migrating: %q", err)
 	}
-	bulkInsert(st.S)
-	logrus.Infof("Done, please end with ctl+c")
+	st.bulkInsert()
+	logrus.Infof("Done")
 }
 
-func createTable(s internal.Settings) error {
-	statement := s.DBInterface.GetTableExists(s.DBConnectionInfo.DBName, s.TableName)
-	exists, err := s.DBInterface.ExecStatementWithReturnBool(statement)
-
-	if err != nil {
-		return fmt.Errorf("could not check if table '%s.%s' exists with error: %q", s.DBConnectionInfo.DBName, s.TableName, err)
-	}
-	if exists {
-		return nil
-	}
-	query := s.DBInterface.Createable(s.DBConnectionInfo.DBName, s.TableName)
-	err = s.DBInterface.ExecDDLStatement(query)
-	if err != nil {
-		return fmt.Errorf("could not create table '%s.%s' with error: %q", s.DBConnectionInfo.DBName, s.TableName, err)
-	}
-	return nil
-}
-
-func bulkInsert(s internal.Settings) {
+func (st InsertReadWrite) bulkInsert() {
 	wg := sync.WaitGroup{}
 	ch := make(chan int)
 	for i := 0; i < 20; i++ {
@@ -54,7 +36,7 @@ func bulkInsert(s internal.Settings) {
 		go func() {
 			defer wg.Done()
 			for range ch {
-				err := dbinsert(s)
+				err := dbinsert(st.S, st.TableName)
 				if err != nil {
 					logrus.Warnf("Error inserting: %s", err)
 				}
@@ -62,18 +44,18 @@ func bulkInsert(s internal.Settings) {
 		}()
 	}
 
-	for i := 0; i < s.Initialdatasize; i++ {
+	for i := 0; i < st.S.Initialdatasize; i++ {
 		ch <- i
 	}
 	close(ch)
 	wg.Wait()
 }
 
-func dbinsert(s internal.Settings) error {
+func dbinsert(s internal.Settings, tableName string) error {
 	r := helper.GenerateRow(s.Randomizer)
-	err := s.DBInterface.ExecStatement("INSERT INTO "+s.TableName+"(k, c , pad) VALUES ("+strconv.Itoa(r.K)+",'"+r.C+"','"+r.Pad+"');", "blkinsert")
+	err := s.DBInterface.ExecStatement("INSERT INTO "+tableName+"(k, c , pad) VALUES ("+strconv.Itoa(r.K)+",'"+r.C+"','"+r.Pad+"');", "blkinsert")
 	if err != nil {
-		logrus.Warnf("Error %s when inserting row into %s table. Values: %+v)", err, s.TableName, r)
+		logrus.Warnf("Error %s when inserting row into %s table. Values: %+v)", err, tableName, r)
 		return err
 	}
 	return nil

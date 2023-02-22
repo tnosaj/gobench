@@ -11,7 +11,11 @@ import (
 	"time"
 
 	"github.com/go-sql-driver/mysql"
+	"github.com/golang-migrate/migrate/v4"
+	mysqlmigrate "github.com/golang-migrate/migrate/v4/database/mysql"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/prometheus/client_golang/prometheus"
+
 	"github.com/sirupsen/logrus"
 )
 
@@ -109,23 +113,6 @@ func (e ExecuteMySQL) Ping() error {
 	return nil
 }
 
-// GetTableExists returns a query to check if dbName.tableName exists
-func (e ExecuteMySQL) GetTableExists(dbName, tableName string) string {
-	return fmt.Sprintf("SELECT EXISTS(SELECT * FROM information_schema.tables "+
-		"WHERE table_schema = '%s' AND table_name = '%s');", dbName, tableName)
-}
-
-// Createable returns a query to check if dbName.tableName exists
-func (e ExecuteMySQL) Createable(dbName, tableName string) string {
-	return fmt.Sprintf("CREATE TABLE %s.%s ( "+
-		"id int(11) NOT NULL AUTO_INCREMENT, "+
-		"k int(11) NOT NULL DEFAULT '0', "+
-		"c char(120) NOT NULL DEFAULT '', "+
-		"pad char(60) NOT NULL DEFAULT '', "+
-		"PRIMARY KEY (id), "+
-		"KEY k_1 (k)) ENGINE=InnoDB;", dbName, tableName)
-}
-
 func connectMySQL(connectionInfo ConnectionInfo, poolsize int, metrics Metrics, tlsCerts TLSCerts) (*ExecuteMySQL, *sql.DB, error) {
 	logrus.Debugf("will connect to mysql")
 
@@ -182,4 +169,64 @@ func dsnFromConnectionInfo(connectionInfo ConnectionInfo) string {
 		connectionInfo.Port,
 		connectionInfo.DBName,
 	)
+}
+
+func (e ExecuteMySQL) AutoMigrateUP(folder string) error {
+	logrus.Debug("automatically migrating mysql up")
+	driver, err := mysqlmigrate.WithInstance(e.Con, &mysqlmigrate.Config{
+		MigrationsTable: "users_schema_migrations",
+	})
+	if err != nil {
+		logrus.Errorf("Failed to create migration connection %s", err)
+		return err
+	}
+	m, _ := migrate.NewWithDatabaseInstance(
+		fmt.Sprintf("file://%s/mysql/", folder),
+		"mysql",
+		driver,
+	)
+
+	if err != nil {
+		logrus.Errorf("Failed to initialize migration connection %s", err)
+		return err
+	}
+
+	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
+		logrus.Errorf("Failed to migrate db: %s", err)
+		return err
+	}
+	logrus.Debug("succesfully migrated mysql up")
+	return nil
+}
+
+func (e ExecuteMySQL) AutoMigrateDown(folder string) error {
+	logrus.Debug("automatically migrating mysql down")
+	driver, err := mysqlmigrate.WithInstance(e.Con, &mysqlmigrate.Config{
+		MigrationsTable: "users_schema_migrations",
+	})
+	if err != nil {
+		logrus.Errorf("Failed to create migration connection %s", err)
+		return err
+	}
+	m, _ := migrate.NewWithDatabaseInstance(
+		fmt.Sprintf("file://%s/mysql/", folder),
+		"mysql",
+		driver,
+	)
+
+	if err != nil {
+		logrus.Errorf("Failed to initialize migration connection %s", err)
+		return err
+	}
+
+	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
+		logrus.Errorf("Failed to migrate db: %s", err)
+		return err
+	}
+	logrus.Debug("succesfully migrated mysql down")
+	return nil
+}
+
+func (l *ExecuteMySQL) Shutdown(context context.Context) {
+	logrus.Info("Shuttingdown longterm mysql server")
 }

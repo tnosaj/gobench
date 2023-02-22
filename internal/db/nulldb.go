@@ -1,8 +1,6 @@
 package db
 
 import (
-	"fmt"
-
 	"github.com/sirupsen/logrus"
 )
 
@@ -47,12 +45,12 @@ func (e ExecuteNull) Ping() error {
 	return nil
 }
 
-// GetTableExists returns a query to check if dbName.tableName exists
-func (e ExecuteNull) GetTableExists(dbName, tableName string) string {
-	return fmt.Sprintf("Fancy query to check if '%s' exists in '%s'", tableName, dbName)
+func (e ExecuteNull) AutoMigrateUP(folderName string) error {
+	logrus.Info("MigrateUp from folder '%s'", folderName)
+	return nil
 }
 
-// Createable returns a query to check if dbName.tableName exists
-func (e ExecuteNull) Createable(dbName, tableName string) string {
-	return fmt.Sprintf("Fancy query to create '%s.%s'", tableName, dbName)
+func (e ExecuteNull) AutoMigrateDown(folderName string) error {
+	logrus.Info("MigrateDown from folder '%s'", folderName)
+	return nil
 }

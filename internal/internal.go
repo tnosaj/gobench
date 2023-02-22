@@ -17,13 +17,13 @@ type Settings struct {
 
 	Debug bool
 
-	Action           string
-	DB               string
-	DBConnection     *sql.DB
-	DBConnectionInfo db.ConnectionInfo
-	DurationType     string
-	Port             string
-	TableName        string
+	Action             string
+	DB                 string
+	DBConnection       *sql.DB
+	DBConnectionInfo   db.ConnectionInfo
+	DurationType       string
+	Port               string
+	SqlMigrationFolder string
 
 	Strategy string
 

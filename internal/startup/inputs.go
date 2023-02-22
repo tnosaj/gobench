@@ -19,7 +19,7 @@ func EvaluateInputs() (internal.Settings, error) {
 	flag.BoolVar(&s.Debug, "v", false, "Enable verbose debugging output")
 
 	flag.StringVar(&s.Action, "a", "unset", "Perform this action, must be one of the following: prepare,run,cleanup")
-	flag.StringVar(&s.TableName, "n", "sbtest", "Base table name")
+	flag.StringVar(&s.SqlMigrationFolder, "m", "/migration", "Sql Migrations Folder")
 	flag.StringVar(&s.Port, "p", "8080", "Starts server on this port")
 	flag.StringVar(&s.Strategy, "strategy", "simple", "Strategy to use")
 	flag.StringVar(&s.TLSCerts.CaCertificate, "cacert", "none", "/path/to/ca-certificate.pem if using tls")

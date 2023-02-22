@@ -9,8 +9,12 @@ import (
 	"time"
 
 	_ "github.com/lib/pq"
-
 	"github.com/prometheus/client_golang/prometheus"
+
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
+
 	"github.com/sirupsen/logrus"
 )
 
@@ -108,24 +112,6 @@ func (e ExecutePostSQL) Ping() error {
 	return nil
 }
 
-// GetTableExists returns a query to check if dbName.tableName exists
-func (e ExecutePostSQL) GetTableExists(dbName, tableName string) string {
-	return fmt.Sprintf("SELECT EXISTS ( "+
-		"SELECT FROM information_schema.tables "+
-		"WHERE  table_catalog = '%s' "+
-		"AND    table_name   = '%s' );", dbName, tableName)
-}
-
-// Createable returns a query to check if dbName.tableName exists
-func (e ExecutePostSQL) Createable(dbName, tableName string) string {
-	return fmt.Sprintf("CREATE TABLE %s ( "+
-		" id SERIAL PRIMARY KEY, "+
-		" k integer NOT NULL DEFAULT '0', "+
-		" c VARCHAR NOT NULL DEFAULT '', "+
-		" pad VARCHAR NOT NULL DEFAULT ''); "+
-		"CREATE INDEX k_idx ON %s (k);", tableName, tableName)
-}
-
 func connectPostgreSQL(connectionInfo ConnectionInfo, poolsize int, metrics Metrics, tlsCerts TLSCerts) (*ExecutePostSQL, *sql.DB, error) {
 	logrus.Debugf("will connect to postgres")
 
@@ -171,4 +157,61 @@ func psqlInfoFromConnectionInfo(connectionInfo ConnectionInfo) string {
 		connectionInfo.Port,
 		connectionInfo.DBName,
 	)
+}
+
+func (e ExecutePostSQL) AutoMigrateUP(folder string) error {
+	logrus.Debug("automatically migrating postgres")
+	driver, err := postgres.WithInstance(e.Con, &postgres.Config{
+		MigrationsTable: "users_schema_migrations",
+	})
+	if err != nil {
+		logrus.Errorf("Failed to create migration connection %s", err)
+		return err
+	}
+	m, err := migrate.NewWithDatabaseInstance(
+		fmt.Sprintf("file://%s/postgres", folder),
+		"postgres", driver,
+	)
+	if err != nil {
+		logrus.Errorf("Failed to initialize migration connection %s", err)
+		return err
+	}
+
+	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
+		logrus.Errorf("Failed to migrate db: %s", err)
+		return err
+	}
+	logrus.Debug("successfully migrated postgres")
+
+	return nil
+}
+func (e ExecutePostSQL) AutoMigrateDown(folder string) error {
+	logrus.Debug("automatically migrating postgres")
+	driver, err := postgres.WithInstance(e.Con, &postgres.Config{
+		MigrationsTable: "users_schema_migrations",
+	})
+	if err != nil {
+		logrus.Errorf("Failed to create migration connection %s", err)
+		return err
+	}
+	m, err := migrate.NewWithDatabaseInstance(
+		fmt.Sprintf("file://%s/postgres", folder),
+		"postgres", driver,
+	)
+	if err != nil {
+		logrus.Errorf("Failed to initialize migration connection %s", err)
+		return err
+	}
+
+	if err := m.Down(); err != nil && err != migrate.ErrNoChange {
+		logrus.Errorf("Failed to migrate db: %s", err)
+		return err
+	}
+	logrus.Debug("successfully migrated postgres")
+
+	return nil
+}
+
+func (l *ExecutePostSQL) Shutdown(context context.Context) {
+	logrus.Info("Shuttingdown longterm postgres server")
 }
