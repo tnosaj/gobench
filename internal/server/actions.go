@@ -77,7 +77,7 @@ func (s *GobenchServer) unifySettings(r *http.Request, action string) (internal.
 	if httpsettings.Rate > 0 {
 		settings.Rate = httpsettings.Rate
 	}
-	logrus.Infof("Settings %+v", settings)
+	//logrus.Debugf("Settings %+v", settings)
 	return settings, nil
 }
 
