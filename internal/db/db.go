@@ -6,14 +6,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-// Row of work
-type Row struct {
-	ID  int
-	K   int
-	C   string
-	Pad string
-}
-
 type TLSCerts struct {
 	CaCertificate     string
 	ClientCertificate string
@@ -40,7 +32,7 @@ type DB interface {
 	ExecStatement(statement, label string) error
 	ExecStatementWithReturnBool(statement string) (bool, error)
 	ExecStatementWithReturnInt(statement string) (int, error)
-	ExecStatementWithReturnRow(statement, label string) (Row, error)
+	ExecStatementWithReturnRow(statement, label string) (interface{}, error)
 	ExecDDLStatement(statement string) error
 	Ping() error
 

@@ -7,7 +7,6 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"gitlab.otters.xyz/jason.tevnan/gobench/internal"
-	"gitlab.otters.xyz/jason.tevnan/gobench/internal/helper"
 )
 
 // create basic prepare
@@ -52,7 +51,7 @@ func (st SimpleReadWrite) bulkInsert() {
 }
 
 func dbinsert(s internal.Settings, tableName string) error {
-	r := helper.GenerateRow(s.Randomizer)
+	r := generateRow(s.Randomizer)
 	err := s.DBInterface.ExecStatement("INSERT INTO "+tableName+"(k, c , pad) VALUES ("+strconv.Itoa(r.K)+",'"+r.C+"','"+r.Pad+"');", "blkinsert")
 	if err != nil {
 		logrus.Warnf("Error %s when inserting row into %s table. Values: %+v)", err, tableName, r)

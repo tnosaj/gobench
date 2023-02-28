@@ -5,8 +5,15 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"gitlab.otters.xyz/jason.tevnan/gobench/internal"
-	"gitlab.otters.xyz/jason.tevnan/gobench/internal/helper"
 )
+
+// Row of work
+type Row struct {
+	ID  int
+	K   int
+	C   string
+	Pad string
+}
 
 // InsertReadWrite do stuffs
 type InsertReadWrite struct {
@@ -80,18 +87,37 @@ func (st InsertReadWrite) getSk() string {
 
 // insert one record
 func (st InsertReadWrite) create() string {
-	r := helper.GenerateRow(st.S.Randomizer)
+	r := generateRow(st.S.Randomizer)
 	return "INSERT INTO " + st.TableName + "(k, c , pad) VALUES (" + strconv.Itoa(r.K) + ",'" + r.C + "','" + r.Pad + "');"
 
 }
 
 // update one record
 func (st InsertReadWrite) update() string {
-	r := helper.GenerateRow(st.S.Randomizer)
+	r := generateRow(st.S.Randomizer)
 	return "UPDATE " + st.TableName + " SET c='" + r.C + "', pad='" + r.Pad + "' WHERE id=" + strconv.Itoa(st.S.Randomizer.Intn(st.MaxIDCount)) + ";"
 }
 
 // delete one record
 func (st InsertReadWrite) delete() string {
 	return "DELETE FROM " + st.TableName + " WHERE id=" + strconv.Itoa(st.S.Randomizer.Intn(st.MaxIDCount)) + ";"
+}
+
+// generateRow returns a row
+func generateRow(rand internal.Random) Row {
+	return Row{
+		K:   rand.Intn(2147483647),
+		C:   randomString(120, rand),
+		Pad: randomString(60, rand),
+	}
+}
+
+var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+func randomString(n int, rand internal.Random) string {
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(b)
 }

@@ -70,17 +70,17 @@ func (e ExecuteMySQL) ExecStatementWithReturnInt(statement string) (int, error) 
 }
 
 // ExecStatementWithReturnRow will execute a statement 's', track it under the label 'l' and return the resulting Row
-func (e ExecuteMySQL) ExecStatementWithReturnRow(statement, label string) (Row, error) {
+func (e ExecuteMySQL) ExecStatementWithReturnRow(statement, label string) (interface{}, error) {
 	logrus.Debugf("will execut %q", statement)
 
 	timer := prometheus.NewTimer(e.Metrics.DBRequestDuration.WithLabelValues(label))
-	var returnedRow Row
+	var returnedRow interface{}
 
 	q := e.Con.QueryRow(statement)
 
 	if err := q.Scan(&returnedRow); err != nil {
 		e.Metrics.DBErrorRequests.WithLabelValues(label).Inc()
-		return Row{}, fmt.Errorf("query %q failed: %q", statement, err)
+		return returnedRow, fmt.Errorf("query %q failed: %q", statement, err)
 	}
 	timer.ObserveDuration()
 

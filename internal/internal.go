@@ -2,6 +2,7 @@ package internal
 
 import (
 	"database/sql"
+	"fmt"
 
 	"gitlab.otters.xyz/jason.tevnan/gobench/internal/db"
 	"gitlab.otters.xyz/jason.tevnan/gobench/pkg/args"
@@ -37,4 +38,11 @@ type Settings struct {
 // Random interface to help with testing
 type Random interface {
 	Intn(int) int
+}
+
+func (settingOriginal Settings) PrintableSettings() string {
+	type fakeSetting Settings
+	printable := fakeSetting(settingOriginal)
+	printable.DBConnectionInfo.Password = "[REDACTED]"
+	return fmt.Sprintf("%#v", printable)
 }
