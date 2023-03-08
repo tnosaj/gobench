@@ -22,7 +22,7 @@ type SimpleReadWrite struct {
 	TableName  string
 }
 
-func MakeSimpleReadWriteStrategy(s internal.Settings, action string) SimpleReadWrite {
+func MakeSimpleStrategy(s internal.Settings, action string) SimpleReadWrite {
 	logrus.Info("creating SimpleReadWrite")
 
 	tableName := "sbtest"

@@ -25,9 +25,9 @@ func Start(s internal.Settings) {
 
 	switch s.Strategy {
 	case "simple":
-		st = simple.MakeSimpleReadWriteStrategy(s, s.Action)
+		st = simple.MakeSimpleStrategy(s, s.Action)
 	case "insert":
-		st = insert.MakeInsertReadWriteStrategy(s, s.Action)
+		st = insert.MakeInsertStrategy(s, s.Action)
 	}
 
 	switch s.Action {

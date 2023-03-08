@@ -22,7 +22,7 @@ type InsertReadWrite struct {
 	TableName  string
 }
 
-func MakeInsertReadWriteStrategy(s internal.Settings, action string) InsertReadWrite {
+func MakeInsertStrategy(s internal.Settings, action string) InsertReadWrite {
 	logrus.Info("creating InsertReadWrite")
 	tableName := "sbtest"
 	var count int
