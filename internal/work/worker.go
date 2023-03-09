@@ -8,6 +8,7 @@ import (
 	"gitlab.otters.xyz/jason.tevnan/gobench/internal"
 	"gitlab.otters.xyz/jason.tevnan/gobench/internal/strategy"
 	"gitlab.otters.xyz/jason.tevnan/gobench/internal/strategy/insert"
+	"gitlab.otters.xyz/jason.tevnan/gobench/internal/strategy/n26"
 	"gitlab.otters.xyz/jason.tevnan/gobench/internal/strategy/simple"
 )
 
@@ -28,6 +29,8 @@ func Start(s internal.Settings) {
 		st = simple.MakeSimpleStrategy(s, s.Action)
 	case "insert":
 		st = insert.MakeInsertStrategy(s, s.Action)
+	case "n26":
+		st = n26.MakeN26Strategy(s, s.Action)
 	}
 
 	switch s.Action {
