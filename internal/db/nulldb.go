@@ -48,11 +48,11 @@ func (e ExecuteNull) Ping() error {
 }
 
 func (e ExecuteNull) AutoMigrateUP(folderName string) error {
-	logrus.Info("MigrateUp from folder '%s'", folderName)
+	logrus.Infof("MigrateUp from folder '%s'", folderName)
 	return nil
 }
 
 func (e ExecuteNull) AutoMigrateDown(folderName string) error {
-	logrus.Info("MigrateDown from folder '%s'", folderName)
+	logrus.Infof("MigrateDown from folder '%s'", folderName)
 	return nil
 }
