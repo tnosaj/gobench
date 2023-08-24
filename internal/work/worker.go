@@ -7,8 +7,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"gitlab.otters.xyz/jason.tevnan/gobench/internal"
 	"gitlab.otters.xyz/jason.tevnan/gobench/internal/strategy"
-	"gitlab.otters.xyz/jason.tevnan/gobench/internal/strategy/insert"
-	"gitlab.otters.xyz/jason.tevnan/gobench/internal/strategy/simple"
 )
 
 // ExecutionType defines how long queries are run
@@ -17,19 +15,11 @@ type ExecutionType interface {
 }
 
 // Start running
-func Start(s internal.Settings) {
+func Start(s internal.Settings, st strategy.ExecutionStrategy) {
 
 	wp := newWorkerPool(s.Concurrency, s.Rate)
 
-	var st strategy.ExecutionStrategy
-
-	switch s.Strategy {
-	case "simple":
-		st = simple.MakeSimpleStrategy(s, s.Action)
-	case "insert":
-		st = insert.MakeInsertStrategy(s, s.Action)
-	}
-
+	st.UpdateSettings(s)
 	switch s.Action {
 	case "prepare":
 		logrus.Info("running prepare")

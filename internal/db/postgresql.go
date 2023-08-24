@@ -4,8 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"io/ioutil"
 	"log"
+	"os"
 	"time"
 
 	_ "github.com/lib/pq"
@@ -119,7 +119,7 @@ func connectPostgreSQL(connectionInfo ConnectionInfo, poolsize int, metrics Metr
 	if tlsCerts.CaCertificate != "none" {
 		logrus.Infof("using tls with cert: %s", tlsCerts.CaCertificate)
 
-		_, err := ioutil.ReadFile(tlsCerts.CaCertificate)
+		_, err := os.ReadFile(tlsCerts.CaCertificate)
 		if err != nil {
 			logrus.Fatalf("failed to read certificate file: %s", err)
 		}
