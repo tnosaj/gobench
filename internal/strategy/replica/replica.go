@@ -89,7 +89,10 @@ func (st *ReplicaReadWrite) read() (string, string) {
 }
 
 func (st *ReplicaReadWrite) write() (string, string) {
-	switch st.S.Randomizer.Intn(5) {
+
+	i := st.S.Randomizer.Intn(5)
+	logrus.Infof("random %d", i)
+	switch i {
 	case 0:
 		logrus.Debugf("Will perform insert")
 		return st.create(), "create"
@@ -141,7 +144,7 @@ func (st *ReplicaReadWrite) delete() string {
 	id := st.getRandomAsset()
 	st.Assets = removeFromSlice(st.Assets, id)
 
-	return "DELETE FROM " + st.TableName + " WHERE id=" + id + ";"
+	return fmt.Sprintf("DELETE FROM %s WHERE id='%s';", st.TableName, id)
 }
 
 func (st *ReplicaReadWrite) getRandomRegion() string {
