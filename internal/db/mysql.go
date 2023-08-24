@@ -6,8 +6,8 @@ import (
 	"crypto/x509"
 	"database/sql"
 	"fmt"
-	"io/ioutil"
 	"log"
+	"os"
 	"time"
 
 	"github.com/go-sql-driver/mysql"
@@ -121,7 +121,7 @@ func connectMySQL(connectionInfo ConnectionInfo, poolsize int, metrics Metrics, 
 	if tlsCerts.CaCertificate != "none" {
 		logrus.Infof("using tls with cert: %s", tlsCerts.CaCertificate)
 		rootCertPool := x509.NewCertPool()
-		pem, err := ioutil.ReadFile(tlsCerts.CaCertificate)
+		pem, err := os.ReadFile(tlsCerts.CaCertificate)
 		if err != nil {
 			logrus.Fatalf("failed to read certificate file: %s", err)
 		}

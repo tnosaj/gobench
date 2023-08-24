@@ -3,7 +3,6 @@ package startup
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"os"
 
 	"github.com/sirupsen/logrus"
@@ -88,7 +87,7 @@ func EvaluateInputs() (internal.Settings, error) {
 
 	for _, tlsfile := range []string{s.TLSCerts.CaCertificate, s.TLSCerts.ClientCertificate, s.TLSCerts.ClientKey} {
 		if tlsfile != "none" {
-			_, err := ioutil.ReadFile(tlsfile)
+			_, err := os.ReadFile(tlsfile)
 			if err != nil {
 				return internal.Settings{}, fmt.Errorf("%q set, but unreadable path: %q", tlsfile, err)
 			}

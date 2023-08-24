@@ -28,6 +28,7 @@ func run(s internal.Settings, wp *workerPool, st strategy.ExecutionStrategy) {
 	}
 
 	runner.Run()
+	logrus.Infof("Done")
 }
 
 // RunForEventCount do stuffs

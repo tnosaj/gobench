@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 
 	"github.com/sirupsen/logrus"
@@ -20,34 +19,37 @@ func (s *GobenchServer) Status(w http.ResponseWriter, r *http.Request) {
 
 func (s *GobenchServer) Prepare(w http.ResponseWriter, r *http.Request) {
 	logrus.Debugf("Prepare request")
-	settings, err := s.unifySettings(r, "prepare")
+	var err error
+	s.Settings, err = s.unifySettings(r, "prepare")
 	if err != nil {
 		returnError(w, err, http.StatusInternalServerError)
 		return
 	}
-	go work.Start(settings)
+	go work.Start(s.Settings, *s.Strategy)
 	return
 }
 
 func (s *GobenchServer) Run(w http.ResponseWriter, r *http.Request) {
 	logrus.Debugf("Run request")
-	settings, err := s.unifySettings(r, "run")
+	var err error
+	s.Settings, err = s.unifySettings(r, "run")
 	if err != nil {
 		returnError(w, err, http.StatusInternalServerError)
 		return
 	}
-	go work.Start(settings)
+	go work.Start(s.Settings, *s.Strategy)
 	return
 }
 
 func (s *GobenchServer) Cleanup(w http.ResponseWriter, r *http.Request) {
 	logrus.Debugf("Cleanup request")
-	settings, err := s.unifySettings(r, "cleanup")
+	var err error
+	s.Settings, err = s.unifySettings(r, "cleanup")
 	if err != nil {
 		returnError(w, err, http.StatusInternalServerError)
 		return
 	}
-	go work.Start(settings)
+	go work.Start(s.Settings, *s.Strategy)
 	return
 }
 
@@ -82,7 +84,7 @@ func (s *GobenchServer) unifySettings(r *http.Request, action string) (internal.
 }
 
 func getSettingsFromPost(r *http.Request) (HttpSettings, error) {
-	untypedRequestBody, err := ioutil.ReadAll(r.Body)
+	untypedRequestBody, err := io.ReadAll(r.Body)
 	r.Body.Close()
 	if err != nil {
 		return HttpSettings{}, fmt.Errorf("Body read error: %q", err)

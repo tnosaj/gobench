@@ -15,7 +15,7 @@ import (
 // * sk index
 
 // Prepare stuff
-func (st SimpleReadWrite) Prepare() {
+func (st *SimpleReadWrite) Prepare() {
 	logrus.Infof("prepare")
 
 	err := st.S.DBInterface.AutoMigrateUP(fmt.Sprintf("%s/simple", st.S.SqlMigrationFolder))
@@ -26,7 +26,7 @@ func (st SimpleReadWrite) Prepare() {
 	logrus.Infof("Done")
 }
 
-func (st SimpleReadWrite) bulkInsert() {
+func (st *SimpleReadWrite) bulkInsert() {
 	wg := sync.WaitGroup{}
 	ch := make(chan int)
 	for i := 0; i < 20; i++ {
@@ -50,7 +50,7 @@ func (st SimpleReadWrite) bulkInsert() {
 	wg.Wait()
 }
 
-func dbinsert(s internal.Settings, tableName string) error {
+func dbinsert(s *internal.Settings, tableName string) error {
 	r := generateRow(s.Randomizer)
 	err := s.DBInterface.ExecStatement("INSERT INTO "+tableName+"(k, c , pad) VALUES ("+strconv.Itoa(r.K)+",'"+r.C+"','"+r.Pad+"');", "blkinsert")
 	if err != nil {
