@@ -90,9 +90,7 @@ func (st *ReplicaReadWrite) read() (string, string) {
 
 func (st *ReplicaReadWrite) write() (string, string) {
 
-	i := st.S.Randomizer.Intn(5)
-	logrus.Infof("random %d", i)
-	switch i {
+	switch st.S.Randomizer.Intn(5) {
 	case 0:
 		logrus.Debugf("Will perform insert")
 		return st.create(), "create"
