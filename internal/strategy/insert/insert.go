@@ -25,7 +25,6 @@ type InsertReadWrite struct {
 func MakeInsertStrategy(s *internal.Settings) *InsertReadWrite {
 	logrus.Info("creating InsertReadWrite")
 	tableName := "sbtest"
-	var count int
 	// if action == "run" {
 	// 	count, err := s.DBInterface.ExecStatementWithReturnInt("select count(id) from " + tableName + ";")
 
@@ -36,7 +35,7 @@ func MakeInsertStrategy(s *internal.Settings) *InsertReadWrite {
 	// }
 	return &InsertReadWrite{
 		S:          s,
-		MaxIDCount: count,
+		MaxIDCount: s.Initialdatasize,
 		TableName:  tableName,
 	}
 }

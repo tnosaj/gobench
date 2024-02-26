@@ -41,8 +41,9 @@ func MakeSimpleStrategy(s *internal.Settings) *SimpleReadWrite {
 	// 	}
 	// }
 	return &SimpleReadWrite{
-		S:         s,
-		TableName: tableName,
+		S:          s,
+		MaxIDCount: s.Initialdatasize,
+		TableName:  tableName,
 	}
 }
 
