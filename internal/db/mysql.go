@@ -148,6 +148,8 @@ func connectMySQL(connectionInfo ConnectionInfo, poolsize int, metrics Metrics, 
 		})
 		DSN = DSN + "?tls=custom"
 
+	} else {
+		DSN = DSN + "?tls=skip-verify"
 	}
 
 	c, err := sql.Open("mysql", DSN)

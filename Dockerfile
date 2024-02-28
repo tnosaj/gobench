@@ -3,22 +3,29 @@
 ##
 ## Build
 ##
-FROM golang:1.16-buster AS build
+FROM golang:latest AS build
+
+ARG TARGETOS
+ARG TARGETARCH
 
 WORKDIR /app
 
 COPY . /app/
 
-RUN go mod download && CGO_ENABLED=0 GOOS=linux go build -o /gobench
+RUN CGO_ENABLED=0 GOOS=linux go build -o /gobench
 
 ##
 ## Deploy
 ##
-FROM alpine:3
+FROM alpine:latest
+
+ARG TARGETOS
+ARG TARGETARCH
 
 WORKDIR /
 
 COPY --from=build /gobench /gobench
+COPY --from=build /app/migrations /migrations
 
 #RUN apk add --no-cache \
 #        musl
