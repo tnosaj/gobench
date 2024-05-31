@@ -6,9 +6,9 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
-	"gitlab.otters.xyz/jason.tevnan/gobench/internal/db"
-	"gitlab.otters.xyz/jason.tevnan/gobench/internal/server"
-	"gitlab.otters.xyz/jason.tevnan/gobench/internal/startup"
+	"github.com/tnosaj/gobench/internal/db"
+	"github.com/tnosaj/gobench/internal/server"
+	"github.com/tnosaj/gobench/internal/startup"
 
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus/promhttp"

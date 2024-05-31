@@ -6,7 +6,7 @@ import (
 	"sync"
 
 	"github.com/sirupsen/logrus"
-	"gitlab.otters.xyz/jason.tevnan/gobench/internal"
+	"github.com/tnosaj/gobench/internal"
 )
 
 // create basic prepare

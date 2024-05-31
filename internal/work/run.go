@@ -4,8 +4,8 @@ import (
 	"log"
 
 	"github.com/sirupsen/logrus"
-	"gitlab.otters.xyz/jason.tevnan/gobench/internal"
-	"gitlab.otters.xyz/jason.tevnan/gobench/internal/strategy"
+	"github.com/tnosaj/gobench/internal"
+	"github.com/tnosaj/gobench/internal/strategy"
 )
 
 func run(s internal.Settings, wp *workerPool, st strategy.ExecutionStrategy) {

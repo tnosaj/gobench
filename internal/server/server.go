@@ -2,11 +2,11 @@ package server
 
 import (
 	"github.com/sirupsen/logrus"
-	"gitlab.otters.xyz/jason.tevnan/gobench/internal"
-	"gitlab.otters.xyz/jason.tevnan/gobench/internal/strategy"
-	"gitlab.otters.xyz/jason.tevnan/gobench/internal/strategy/insert"
-	"gitlab.otters.xyz/jason.tevnan/gobench/internal/strategy/replica"
-	"gitlab.otters.xyz/jason.tevnan/gobench/internal/strategy/simple"
+	"github.com/tnosaj/gobench/internal"
+	"github.com/tnosaj/gobench/internal/strategy"
+	"github.com/tnosaj/gobench/internal/strategy/insert"
+	"github.com/tnosaj/gobench/internal/strategy/replica"
+	"github.com/tnosaj/gobench/internal/strategy/simple"
 )
 
 type GobenchServer struct {

@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/tj/assert"
-	"gitlab.otters.xyz/jason.tevnan/gobench/internal/helper"
+	"github.com/tnosaj/gobench/internal/helper"
 )
 
 func TestFakeRandom(t *testing.T) {

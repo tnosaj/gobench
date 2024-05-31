@@ -7,8 +7,8 @@ import (
 	"net/http"
 
 	"github.com/sirupsen/logrus"
-	"gitlab.otters.xyz/jason.tevnan/gobench/internal"
-	"gitlab.otters.xyz/jason.tevnan/gobench/internal/work"
+	"github.com/tnosaj/gobench/internal"
+	"github.com/tnosaj/gobench/internal/work"
 )
 
 func (s *GobenchServer) Status(w http.ResponseWriter, r *http.Request) {

@@ -1,6 +1,6 @@
 package strategy
 
-import "gitlab.otters.xyz/jason.tevnan/gobench/internal"
+import "github.com/tnosaj/gobench/internal"
 
 // ExecutionStrategy defines what queries are run how
 type ExecutionStrategy interface {

@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 
-	"gitlab.otters.xyz/jason.tevnan/gobench/internal/db"
-	"gitlab.otters.xyz/jason.tevnan/gobench/pkg/args"
+	"github.com/tnosaj/gobench/internal/db"
+	"github.com/tnosaj/gobench/pkg/args"
 )
 
 // Settings contains global settings

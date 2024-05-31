@@ -7,7 +7,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
-	"gitlab.otters.xyz/jason.tevnan/gobench/internal"
+	"github.com/tnosaj/gobench/internal"
 )
 
 // Row of work

@@ -6,9 +6,9 @@ import (
 	"os"
 
 	"github.com/sirupsen/logrus"
-	"gitlab.otters.xyz/jason.tevnan/gobench/internal"
-	"gitlab.otters.xyz/jason.tevnan/gobench/internal/helper"
-	"gitlab.otters.xyz/jason.tevnan/gobench/pkg/args"
+	"github.com/tnosaj/gobench/internal"
+	"github.com/tnosaj/gobench/internal/helper"
+	"github.com/tnosaj/gobench/pkg/args"
 )
 
 // EvaluateInputs checks for sanity

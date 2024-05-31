@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/sirupsen/logrus"
-	"gitlab.otters.xyz/jason.tevnan/gobench/internal"
-	"gitlab.otters.xyz/jason.tevnan/gobench/internal/strategy"
+	"github.com/tnosaj/gobench/internal"
+	"github.com/tnosaj/gobench/internal/strategy"
 )
 
 // ExecutionType defines how long queries are run

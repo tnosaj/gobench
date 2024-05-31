@@ -182,7 +182,7 @@ func (e ExecuteMySQL) AutoMigrateUP(folder string) error {
 		logrus.Errorf("Failed to create migration connection %s", err)
 		return err
 	}
-	m, _ := migrate.NewWithDatabaseInstance(
+	m, err := migrate.NewWithDatabaseInstance(
 		fmt.Sprintf("file://%s/mysql/", folder),
 		"mysql",
 		driver,
@@ -210,7 +210,7 @@ func (e ExecuteMySQL) AutoMigrateDown(folder string) error {
 		logrus.Errorf("Failed to create migration connection %s", err)
 		return err
 	}
-	m, _ := migrate.NewWithDatabaseInstance(
+	m, err := migrate.NewWithDatabaseInstance(
 		fmt.Sprintf("file://%s/mysql/", folder),
 		"mysql",
 		driver,
