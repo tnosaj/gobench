@@ -26,6 +26,8 @@ func EvaluateInputs() (internal.Settings, error) {
 	flag.StringVar(&s.TLSCerts.ClientKey, "clientkey", "none", "/path/to/client-key.key if using tls")
 	flag.StringVar(&s.DurationType, "duration", "events", "Duratation type - events|seconds")
 
+	flag.StringVar(&s.TmpFile, "tmpfile", "none", "/path/to/tmpfile to seed existing data")
+
 	flag.IntVar(&s.Concurrency, "t", 1, "Concurrent number of threads to run")
 	flag.IntVar(&s.Connectionpoolsize, "c", 20, "Connection pool size")
 	flag.IntVar(&s.Initialdatasize, "i", 1000, "Initial size to populate")
@@ -77,9 +79,10 @@ func EvaluateInputs() (internal.Settings, error) {
 	}
 
 	acceptedDBs := map[string]bool{
-		"mysql":    true,
-		"postgres": true,
-		"nulldb":   true,
+		"aerospike": true,
+		"mysql":     true,
+		"postgres":  true,
+		"nulldb":    true,
 	}
 	if !acceptedDBs[s.DB] {
 		return internal.Settings{}, fmt.Errorf("Unknown db engine specified: %q", s.DB)

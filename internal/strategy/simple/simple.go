@@ -1,6 +1,7 @@
 package simple
 
 import (
+	"context"
 	"strconv"
 
 	"github.com/sirupsen/logrus"
@@ -20,6 +21,7 @@ type SimpleReadWrite struct {
 	S          *internal.Settings
 	MaxIDCount int
 	TableName  string
+	Values     []string
 }
 
 func MakeSimpleStrategy(s *internal.Settings) *SimpleReadWrite {
@@ -49,6 +51,18 @@ func MakeSimpleStrategy(s *internal.Settings) *SimpleReadWrite {
 
 func (st *SimpleReadWrite) UpdateSettings(s internal.Settings) {
 	st.S = &s
+}
+
+func (st *SimpleReadWrite) PopulateExistingValues(v []string) {
+	st.Values = v
+}
+
+func (st *SimpleReadWrite) ReturnExistingValues() []string {
+	return st.Values
+}
+
+func (st *SimpleReadWrite) Shutdown(c context.Context) {
+	st.Shutdown(c)
 }
 
 // CreateCommand do stuffs

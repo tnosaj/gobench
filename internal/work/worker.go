@@ -18,7 +18,6 @@ type ExecutionType interface {
 func Start(s internal.Settings, st strategy.ExecutionStrategy) {
 
 	wp := newWorkerPool(s.Concurrency, s.Rate)
-
 	st.UpdateSettings(s)
 	switch s.Action {
 	case "prepare":
@@ -53,6 +52,7 @@ func newWorkerPool(poolsize, rate int) *workerPool {
 		wg.Add(1)
 
 		go func() {
+
 			defer wg.Done()
 			for f := range ch {
 				f()

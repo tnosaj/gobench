@@ -1,6 +1,7 @@
 package insert
 
 import (
+	"context"
 	"strconv"
 
 	"github.com/sirupsen/logrus"
@@ -20,6 +21,7 @@ type InsertReadWrite struct {
 	S          *internal.Settings
 	MaxIDCount int
 	TableName  string
+	Values     []string
 }
 
 func MakeInsertStrategy(s *internal.Settings) *InsertReadWrite {
@@ -38,6 +40,18 @@ func MakeInsertStrategy(s *internal.Settings) *InsertReadWrite {
 		MaxIDCount: s.Initialdatasize,
 		TableName:  tableName,
 	}
+}
+
+func (st *InsertReadWrite) PopulateExistingValues(v []string) {
+	st.Values = v
+}
+
+func (st *InsertReadWrite) ReturnExistingValues() []string {
+	return st.Values
+}
+
+func (st *InsertReadWrite) Shutdown(c context.Context) {
+	st.Shutdown(c)
 }
 
 func (st *InsertReadWrite) UpdateSettings(s internal.Settings) {

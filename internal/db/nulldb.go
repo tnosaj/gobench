@@ -1,6 +1,8 @@
 package db
 
 import (
+	"context"
+
 	"github.com/sirupsen/logrus"
 )
 
@@ -55,4 +57,8 @@ func (e ExecuteNull) AutoMigrateUP(folderName string) error {
 func (e ExecuteNull) AutoMigrateDown(folderName string) error {
 	logrus.Infof("MigrateDown from folder '%s'", folderName)
 	return nil
+}
+
+func (e ExecuteNull) Shutdown(c context.Context) {
+	logrus.Infof("Shutting down nulldb")
 }

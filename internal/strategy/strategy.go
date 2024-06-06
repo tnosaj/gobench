@@ -1,6 +1,10 @@
 package strategy
 
-import "github.com/tnosaj/gobench/internal"
+import (
+	"context"
+
+	"github.com/tnosaj/gobench/internal"
+)
 
 // ExecutionStrategy defines what queries are run how
 type ExecutionStrategy interface {
@@ -8,4 +12,8 @@ type ExecutionStrategy interface {
 	RunCommand()
 	Cleanup()
 	UpdateSettings(internal.Settings)
+	Shutdown(context.Context)
+
+	PopulateExistingValues([]string)
+	ReturnExistingValues() []string
 }

@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"database/sql"
 	"fmt"
 
 	"github.com/tnosaj/gobench/internal/db"
@@ -20,11 +19,12 @@ type Settings struct {
 
 	Action             string
 	DB                 string
-	DBConnection       *sql.DB
 	DBConnectionInfo   db.ConnectionInfo
 	DurationType       string
 	Port               string
 	SqlMigrationFolder string
+
+	TmpFile string
 
 	Strategy string
 

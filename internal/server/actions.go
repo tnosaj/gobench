@@ -25,7 +25,7 @@ func (s *GobenchServer) Prepare(w http.ResponseWriter, r *http.Request) {
 		returnError(w, err, http.StatusInternalServerError)
 		return
 	}
-	go work.Start(s.Settings, *s.Strategy)
+	go work.Start(s.Settings, s.Strategy)
 	return
 }
 
@@ -37,7 +37,7 @@ func (s *GobenchServer) Run(w http.ResponseWriter, r *http.Request) {
 		returnError(w, err, http.StatusInternalServerError)
 		return
 	}
-	go work.Start(s.Settings, *s.Strategy)
+	go work.Start(s.Settings, s.Strategy)
 	return
 }
 
@@ -49,7 +49,7 @@ func (s *GobenchServer) Cleanup(w http.ResponseWriter, r *http.Request) {
 		returnError(w, err, http.StatusInternalServerError)
 		return
 	}
-	go work.Start(s.Settings, *s.Strategy)
+	go work.Start(s.Settings, s.Strategy)
 	return
 }
 

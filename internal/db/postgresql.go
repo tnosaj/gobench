@@ -112,7 +112,7 @@ func (e ExecutePostSQL) Ping() error {
 	return nil
 }
 
-func connectPostgreSQL(connectionInfo ConnectionInfo, poolsize int, metrics Metrics, tlsCerts TLSCerts) (*ExecutePostSQL, *sql.DB, error) {
+func connectPostgreSQL(connectionInfo ConnectionInfo, poolsize int, metrics Metrics, tlsCerts TLSCerts) (*ExecutePostSQL, error) {
 	logrus.Debugf("will connect to postgres")
 
 	var psqlInfo string
@@ -146,7 +146,7 @@ func connectPostgreSQL(connectionInfo ConnectionInfo, poolsize int, metrics Metr
 	c.SetMaxIdleConns(poolsize)
 	c.SetMaxOpenConns(poolsize)
 	c.SetConnMaxLifetime(360 * time.Second)
-	return &ExecutePostSQL{Con: c, Metrics: metrics}, c, nil
+	return &ExecutePostSQL{Con: c, Metrics: metrics}, nil
 }
 
 func psqlInfoFromConnectionInfo(connectionInfo ConnectionInfo) string {

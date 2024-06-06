@@ -113,7 +113,7 @@ func (e ExecuteMySQL) Ping() error {
 	return nil
 }
 
-func connectMySQL(connectionInfo ConnectionInfo, poolsize int, metrics Metrics, tlsCerts TLSCerts) (*ExecuteMySQL, *sql.DB, error) {
+func connectMySQL(connectionInfo ConnectionInfo, poolsize int, metrics Metrics, tlsCerts TLSCerts) (*ExecuteMySQL, error) {
 	logrus.Debugf("will connect to mysql")
 
 	DSN := dsnFromConnectionInfo(connectionInfo)
@@ -160,7 +160,7 @@ func connectMySQL(connectionInfo ConnectionInfo, poolsize int, metrics Metrics, 
 	c.SetMaxIdleConns(poolsize)
 	c.SetMaxOpenConns(poolsize)
 	c.SetConnMaxLifetime(360 * time.Second)
-	return &ExecuteMySQL{Con: c, Metrics: metrics}, c, nil
+	return &ExecuteMySQL{Con: c, Metrics: metrics}, nil
 }
 
 func dsnFromConnectionInfo(connectionInfo ConnectionInfo) string {
