@@ -1,4 +1,4 @@
-package aerospike
+package lookup
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func (a Aerospike) Cleanup() {
+func (a Lookup) Cleanup() {
 	logrus.Infof("cleanup")
 	err := a.S.DBInterface.AutoMigrateDown(fmt.Sprintf("%s/simple", a.S.SqlMigrationFolder))
 	if err != nil {

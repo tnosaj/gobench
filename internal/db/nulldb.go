@@ -12,7 +12,13 @@ type ExecuteNull struct {
 }
 
 // ExecStatement will log statement
-func (e ExecuteNull) ExecStatement(statement, label string) error {
+func (e ExecuteNull) ExecStatement(statement interface{}, label string) error {
+	logrus.Infof("executing %q with label %q", statement, label)
+	return nil
+}
+
+// ExecStatement will log statement
+func (e ExecuteNull) ExecInterfaceStatement(statement interface{}, label string) error {
 	logrus.Infof("executing %q with label %q", statement, label)
 	return nil
 }

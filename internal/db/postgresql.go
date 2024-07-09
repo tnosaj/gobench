@@ -25,11 +25,25 @@ type ExecutePostSQL struct {
 }
 
 // ExecStatement will execute a statement 's' and track it under the label 'l'
-func (e ExecutePostSQL) ExecStatement(statement, label string) error {
+func (e ExecutePostSQL) ExecStatement(statement interface{}, label string) error {
 	logrus.Debugf("will execut %q", statement)
 	timer := prometheus.NewTimer(e.Metrics.DBRequestDuration.WithLabelValues(label))
 
-	_, err := e.Con.Exec(statement)
+	_, err := e.Con.Exec(statement.(string))
+	if err != nil {
+		e.Metrics.DBErrorRequests.WithLabelValues(label).Inc()
+		return fmt.Errorf("could not execute %q with error %q", statement, err)
+	}
+	timer.ObserveDuration()
+	return nil
+}
+
+// ExecStatement will execute a statement 's' and track it under the label 'l'
+func (e ExecutePostSQL) ExecInterfaceStatement(statement interface{}, label string) error {
+	logrus.Debugf("will execut %q", statement)
+	timer := prometheus.NewTimer(e.Metrics.DBRequestDuration.WithLabelValues(label))
+
+	_, err := e.Con.Exec(stringInterfaceToSQLQuery(statement, label))
 	if err != nil {
 		e.Metrics.DBErrorRequests.WithLabelValues(label).Inc()
 		return fmt.Errorf("could not execute %q with error %q", statement, err)

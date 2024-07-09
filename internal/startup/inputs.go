@@ -80,6 +80,7 @@ func EvaluateInputs() (internal.Settings, error) {
 
 	acceptedDBs := map[string]bool{
 		"aerospike": true,
+		"cassandra": true,
 		"mysql":     true,
 		"postgres":  true,
 		"nulldb":    true,
@@ -121,10 +122,10 @@ func EvaluateInputs() (internal.Settings, error) {
 
 func getEnvVar(envVarName string) (string, error) {
 	check := os.Getenv(envVarName)
-	// if check == "" {
-	// 	printRequiredEnvVars()
-	// 	return "", fmt.Errorf("Missing env var %q", envVarName)
-	// }
+	if check == "" {
+		printRequiredEnvVars()
+		return "", fmt.Errorf("Missing env var %q", envVarName)
+	}
 	return check, nil
 }
 

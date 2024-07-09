@@ -1,4 +1,4 @@
-package aerospike
+package lookup
 
 import (
 	"fmt"
@@ -14,10 +14,10 @@ import (
 // * sk index
 
 // Prepare stuff
-func (a *Aerospike) Prepare() {
+func (a *Lookup) Prepare() {
 	logrus.Infof("prepare")
 
-	err := a.S.DBInterface.AutoMigrateUP(fmt.Sprintf("%s/simple", a.S.SqlMigrationFolder))
+	err := a.S.DBInterface.AutoMigrateUP(fmt.Sprintf("%s/lookup", a.S.SqlMigrationFolder))
 	if err != nil {
 		logrus.Errorf("Error when migrating: %q", err)
 	}
@@ -25,7 +25,7 @@ func (a *Aerospike) Prepare() {
 	logrus.Infof("Done")
 }
 
-func (a *Aerospike) bulkInsert() {
+func (a *Lookup) bulkInsert() {
 	wg := sync.WaitGroup{}
 	ch := make(chan int)
 	for i := 0; i < 20; i++ {
@@ -34,7 +34,7 @@ func (a *Aerospike) bulkInsert() {
 		go func() {
 			defer wg.Done()
 			for range ch {
-				err := a.dbinsert(a.S, a.NameSpace)
+				err := a.dbinsert(a.S, a.StorageLocation)
 				if err != nil {
 					logrus.Warnf("Error inserting: %s", err)
 				}
@@ -49,9 +49,9 @@ func (a *Aerospike) bulkInsert() {
 	wg.Wait()
 }
 
-func (a *Aerospike) dbinsert(s *internal.Settings, tableName string) error {
+func (a *Lookup) dbinsert(s *internal.Settings, tableName string) error {
 	r := a.create()
-	err := s.DBInterface.ExecStatement(r, "blkinsert")
+	err := s.DBInterface.ExecInterfaceStatement(r, "blkinsert")
 	if err != nil {
 		logrus.Warnf("Error %s when inserting row into %s table. Values: %+v)", err, tableName, r)
 		return err

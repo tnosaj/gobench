@@ -2,6 +2,8 @@ package db
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"github.com/prometheus/client_golang/prometheus"
 )
@@ -29,7 +31,9 @@ type ConnectionInfo struct {
 
 // DB Interface for all db operations
 type DB interface {
-	ExecStatement(statement, label string) error
+	ExecStatement(statement interface{}, label string) error
+	// generic interface based exec statement for nosql implementations
+	ExecInterfaceStatement(statement interface{}, label string) error
 	ExecStatementWithReturnBool(statement string) (bool, error)
 	ExecStatementWithReturnInt(statement string) (int, error)
 	ExecStatementWithReturnRow(statement, label string) (interface{}, error)
@@ -47,7 +51,7 @@ func Connect(db string, connectionInfo ConnectionInfo, poolsize int, tls TLSCert
 	databaseRequestDuration := prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Name:    "database_request_duration_seconds",
 		Help:    "Histogram for the runtime of a simple primary key get function.",
-		Buckets: prometheus.LinearBuckets(0.0001, 0.0005, 75),
+		Buckets: prometheus.LinearBuckets(0.00001, 0.00005, 75),
 	}, []string{"query"})
 
 	databaseErrorReuests := prometheus.NewCounterVec(
@@ -77,6 +81,11 @@ func Connect(db string, connectionInfo ConnectionInfo, poolsize int, tls TLSCert
 			DBRequestDuration: databaseRequestDuration,
 			DBErrorRequests:   databaseErrorReuests,
 		}, tls)
+	case "cassandra":
+		return connectCassandra(connectionInfo, Metrics{
+			DBRequestDuration: databaseRequestDuration,
+			DBErrorRequests:   databaseErrorReuests,
+		}, tls)
 	default:
 		return ExecuteNull{Metrics: Metrics{
 			DBRequestDuration: databaseRequestDuration,
@@ -84,4 +93,15 @@ func Connect(db string, connectionInfo ConnectionInfo, poolsize int, tls TLSCert
 		}}, nil
 
 	}
+}
+
+func stringInterfaceToSQLQuery(s interface{}, label string) string {
+	set := strings.Split(s.(string), ",")
+
+	switch label {
+	case "read":
+		return fmt.Sprintf("select id,k,c,pad from %s where id='%s';", set[0], set[1])
+	}
+	return fmt.Sprintf("INSERT INTO %s(k, c , pad) VALUES ('%s','%s','%s',);", set[0], set[1], set[2], set[2])
+
 }

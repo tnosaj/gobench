@@ -1,4 +1,4 @@
-package aerospike
+package lookup
 
 import (
 	"bytes"
@@ -18,47 +18,45 @@ type Row struct {
 }
 
 // SimpleReadWrite do stuffs
-type Aerospike struct {
-	S          *internal.Settings
-	MaxIDCount int
-	NameSpace  string
-	SetName    string
-	Values     []string
+type Lookup struct {
+	S               *internal.Settings
+	MaxIDCount      int
+	StorageLocation string
+	Values          []string
 }
 
-func MakeAerospikeStrategy(s *internal.Settings) *Aerospike {
-	logrus.Info("creating Aerospike")
+func MakeLookupStrategy(s *internal.Settings) *Lookup {
+	logrus.Info("creating Lookup")
 
 	tableName := "sbtest"
 
-	return &Aerospike{
-		S:          s,
-		MaxIDCount: s.Initialdatasize,
-		NameSpace:  tableName,
-		SetName:    tableName,
+	return &Lookup{
+		S:               s,
+		MaxIDCount:      s.Initialdatasize,
+		StorageLocation: tableName,
 	}
 }
 
-func (a *Aerospike) PopulateExistingValues(v []string) {
+func (a *Lookup) PopulateExistingValues(v []string) {
 	a.Values = v
 }
 
-func (a *Aerospike) ReturnExistingValues() []string {
+func (a *Lookup) ReturnExistingValues() []string {
 	return a.Values
 }
 
-func (a *Aerospike) Shutdown(c context.Context) {
+func (a *Lookup) Shutdown(c context.Context) {
 	logrus.Info("shutting down strategy")
 
 	a.S.DBInterface.Shutdown(c)
 }
 
-func (a *Aerospike) UpdateSettings(s internal.Settings) {
+func (a *Lookup) UpdateSettings(s internal.Settings) {
 	a.S = &s
 }
 
 // CreateCommand do stuffs
-func (a *Aerospike) RunCommand() {
+func (a *Lookup) RunCommand() {
 	x := a.S.Randomizer.Intn(100)
 	// x:50  - 50
 	// r:100 - 0
@@ -66,44 +64,40 @@ func (a *Aerospike) RunCommand() {
 	switch {
 	case x <= a.S.ReadWriteSplit.Reads:
 		logrus.Debugf("Will perform read")
-		a.S.DBInterface.ExecStatement(a.read())
+		a.S.DBInterface.ExecInterfaceStatement(a.read())
 	default:
 		logrus.Debugf("Will perform write")
-		a.S.DBInterface.ExecStatement(a.write())
+		a.S.DBInterface.ExecInterfaceStatement(a.write())
 	}
 
 }
 
-func (a *Aerospike) read() (string, string) {
+func (a *Lookup) read() (string, string) {
 	logrus.Debugf("Will perform getRandom")
 	return a.getRandom(), "read"
 
 }
 
-func (a *Aerospike) write() (string, string) {
+func (a *Lookup) write() (string, string) {
 	logrus.Debugf("Will perform insert")
 	return a.create(), "write"
 
 }
 
 // select by primary key
-func (a *Aerospike) getRandom() string {
+func (a *Lookup) getRandom() string {
 	var b bytes.Buffer
-	b.WriteString(a.NameSpace)
-	b.WriteString(",")
-	b.WriteString(a.SetName)
+	b.WriteString(a.StorageLocation)
 	b.WriteString(",")
 	b.WriteString(a.randomUUIDFromList(a.S.Randomizer))
 	return b.String()
 }
 
 // insert one record
-func (a *Aerospike) create() string {
+func (a *Lookup) create() string {
 	id := uuid.New().String()
 	var b bytes.Buffer
-	b.WriteString(a.NameSpace)
-	b.WriteString(",")
-	b.WriteString(a.SetName)
+	b.WriteString(a.StorageLocation)
 	b.WriteString(",")
 	b.WriteString(id)
 	b.WriteString(",")
@@ -113,7 +107,7 @@ func (a *Aerospike) create() string {
 
 }
 
-func (a *Aerospike) randomUUIDFromList(rand internal.Random) string {
+func (a *Lookup) randomUUIDFromList(rand internal.Random) string {
 	randomIndex := rand.Intn(len(a.Values))
 	return a.Values[randomIndex]
 

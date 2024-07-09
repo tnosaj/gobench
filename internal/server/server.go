@@ -10,8 +10,8 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/tnosaj/gobench/internal"
 	"github.com/tnosaj/gobench/internal/strategy"
-	"github.com/tnosaj/gobench/internal/strategy/aerospike"
 	"github.com/tnosaj/gobench/internal/strategy/insert"
+	"github.com/tnosaj/gobench/internal/strategy/lookup"
 	"github.com/tnosaj/gobench/internal/strategy/replica"
 	"github.com/tnosaj/gobench/internal/strategy/simple"
 )
@@ -42,8 +42,10 @@ func NewGobenchServer(settings internal.Settings) GobenchServer {
 		st = insert.MakeInsertStrategy(&settings)
 	case "replica":
 		st = replica.MakeReplicaStrategy(&settings)
-	case "aerospike":
-		st = aerospike.MakeAerospikeStrategy(&settings)
+	case "lookup":
+		st = lookup.MakeLookupStrategy(&settings)
+	default:
+		logrus.Fatalf("unknown strategy: %s", settings.Strategy)
 	}
 	var values []string
 

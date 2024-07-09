@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
+	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -29,88 +30,64 @@ type AerospikeData struct {
 }
 
 // ExecStatement will execute a statement 's' and track it under the label 'l'
-func (e ExecuteAerospike) ExecStatement(statement, label string) error {
+func (e ExecuteAerospike) ExecStatement(statement interface{}, label string) error {
+	logrus.Debugf("NOSQL DOES NOT SUPPORT THIS CALL: %q", statement)
+	return nil
+}
+
+// ExecStatement will execute a statement 's' and track it under the label 'l'
+func (e ExecuteAerospike) ExecInterfaceStatement(statement interface{}, label string) error {
 	logrus.Debugf("will execut %q", statement)
-	data := stringToAreospikeData(statement)
+	data := stringToAerospikeData(statement)
 	key, _ := as.NewKey(data.namespace, data.setname, data.key)
 	timer := prometheus.NewTimer(e.Metrics.DBRequestDuration.WithLabelValues(label))
+	var err as.Error
 	switch label {
 	case "read":
-		e.Con.Get(nil, key)
+		_, err = e.Con.Get(nil, key)
 	default:
 		bin := as.BinMap{"data": data.binmap}
-		e.Con.Put(nil, key, bin)
+		err = e.Con.Put(nil, key, bin)
 	}
-	// _, err := e.Con.Exec(statement)
-	// if err != nil {
-	// 	e.Metrics.DBErrorRequests.WithLabelValues(label).Inc()
-	// 	return fmt.Errorf("could not execute %q with error %q", statement, err)
-	// }
+	if err != nil {
+		e.Metrics.DBErrorRequests.WithLabelValues(label).Inc()
+		return fmt.Errorf("could not execute %q with error %q", statement, err)
+	}
 	timer.ObserveDuration()
 	return nil
 }
 
 // ExecStatementWithReturnBool will execute a statement 's' and return the resulting Boolean
 func (e ExecuteAerospike) ExecStatementWithReturnBool(statement string) (bool, error) {
-	logrus.Debugf("will execut %q", statement)
+	logrus.Debugf("NOSQL DOES NOT SUPPORT THIS CALL: %q", statement)
+
 	var returnedBoolean bool
-
-	// q := e.Con.QueryRow(statement)
-
-	// if err := q.Scan(&returnedBoolean); err != nil {
-
-	// 	return false, fmt.Errorf("query %q failed: %q", statement, err)
-	// }
-	logrus.Debugf("returning %t", returnedBoolean)
 	return returnedBoolean, nil
 }
 
 // ExecStatementWithReturnInt will execute a statement 's' and return the resulting Int
 func (e ExecuteAerospike) ExecStatementWithReturnInt(statement string) (int, error) {
-	logrus.Debugf("will execut %q", statement)
+	logrus.Debugf("NOSQL DOES NOT SUPPORT THIS CALL: %q", statement)
 	var returnedInt int
-
-	// q := e.Con.QueryRow(statement)
-
-	// if err := q.Scan(&returnedInt); err != nil {
-	// 	return 0, fmt.Errorf("query %q failed: %q", statement, err)
-	// }
-
-	logrus.Debugf("returning %d", returnedInt)
 	return returnedInt, nil
 }
 
 // ExecStatementWithReturnRow will execute a statement 's', track it under the label 'l' and return the resulting Row
 func (e ExecuteAerospike) ExecStatementWithReturnRow(statement, label string) (interface{}, error) {
-	logrus.Debugf("will execut %q", statement)
-
-	timer := prometheus.NewTimer(e.Metrics.DBRequestDuration.WithLabelValues(label))
+	logrus.Debugf("NOSQL DOES NOT SUPPORT THIS CALL: %q", statement)
 	var returnedRow interface{}
-
-	// q := e.Con.QueryRow(statement)
-
-	// if err := q.Scan(&returnedRow); err != nil {
-	// 	e.Metrics.DBErrorRequests.WithLabelValues(label).Inc()
-	// 	return returnedRow, fmt.Errorf("query %q failed: %q", statement, err)
-	// }
-	timer.ObserveDuration()
-
-	logrus.Debugf("returning %+v", returnedRow)
-
 	return returnedRow, nil
 }
 
 // ExecDDLStatement will execute a statement 's' as a DDL
 func (e ExecuteAerospike) ExecDDLStatement(statement string) error {
-	logrus.Debugf("will execut %q", statement)
-	// not implemented
+	logrus.Debugf("NOSQL DOES NOT SUPPORT THIS CALL: %q", statement)
 	return nil
 }
 
 // Ping checks if the db is up
 func (e ExecuteAerospike) Ping() error {
-	logrus.Debugf("will execut ping")
-	// not implemented
+	logrus.Debug("NOSQL DOES NOT SUPPORT THIS CALL")
 	return nil
 }
 
@@ -167,13 +144,12 @@ func connectAerospike(connectionInfo ConnectionInfo, metrics Metrics, tlsCerts T
 	}
 
 	client, err = as.NewClientWithPolicy(clientPolicy, connectionInfo.HostName, port)
-	client.DefaultPolicy = basePolicy
-	client.DefaultQueryPolicy.MultiPolicy = *multiPolicy
-	client.DefaultScanPolicy.MultiPolicy = *multiPolicy
-
 	if err != nil {
 		log.Fatalln("Failed to connect to the server cluster: ", err)
 	}
+	client.DefaultPolicy = basePolicy
+	client.DefaultQueryPolicy.MultiPolicy = *multiPolicy
+	client.DefaultScanPolicy.MultiPolicy = *multiPolicy
 
 	return &ExecuteAerospike{Con: client, Metrics: metrics}, nil
 }
@@ -194,16 +170,17 @@ func (e ExecuteAerospike) AutoMigrateDown(folder string) error {
 
 func (e *ExecuteAerospike) Shutdown(context context.Context) {
 	logrus.Info("Shuttingdown aerospike connections")
+	e.Con.Close()
 }
 
-func stringToAreospikeData(s string) AerospikeData {
+func stringToAerospikeData(s interface{}) AerospikeData {
 	var a AerospikeData
-	set := strings.Split(s, ",")
+	set := strings.Split(s.(string), ",")
 	a.namespace = set[0]
-	a.setname = set[1]
-	a.key = set[2]
-	if len(set) > 3 {
-		a.binmap = set[3]
+	a.setname = set[0]
+	a.key = set[1]
+	if len(set) > 2 {
+		a.binmap = set[2]
 	}
 	return a
 }
