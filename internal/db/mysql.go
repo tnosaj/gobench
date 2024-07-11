@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/go-sql-driver/mysql"
@@ -26,11 +27,25 @@ type ExecuteMySQL struct {
 }
 
 // ExecStatement will execute a statement 's' and track it under the label 'l'
-func (e ExecuteMySQL) ExecStatement(statement, label string) error {
+func (e ExecuteMySQL) ExecStatement(statement interface{}, label string) error {
 	logrus.Debugf("will execut %q", statement)
 	timer := prometheus.NewTimer(e.Metrics.DBRequestDuration.WithLabelValues(label))
 
-	_, err := e.Con.Exec(statement)
+	_, err := e.Con.Exec(statement.(string))
+	if err != nil {
+		e.Metrics.DBErrorRequests.WithLabelValues(label).Inc()
+		return fmt.Errorf("could not execute %q with error %q", statement, err)
+	}
+	timer.ObserveDuration()
+	return nil
+}
+
+// ExecStatement will execute a statement 's' and track it under the label 'l'
+func (e ExecuteMySQL) ExecInterfaceStatement(statement interface{}, label string) error {
+	logrus.Tracef("will execut %q", statement)
+	timer := prometheus.NewTimer(e.Metrics.DBRequestDuration.WithLabelValues(label))
+
+	_, err := e.Con.Exec(stringInterfaceToMySQLQuery(statement, label))
 	if err != nil {
 		e.Metrics.DBErrorRequests.WithLabelValues(label).Inc()
 		return fmt.Errorf("could not execute %q with error %q", statement, err)
@@ -113,7 +128,7 @@ func (e ExecuteMySQL) Ping() error {
 	return nil
 }
 
-func connectMySQL(connectionInfo ConnectionInfo, poolsize int, metrics Metrics, tlsCerts TLSCerts) (*ExecuteMySQL, *sql.DB, error) {
+func connectMySQL(connectionInfo ConnectionInfo, poolsize int, metrics Metrics, tlsCerts TLSCerts) (*ExecuteMySQL, error) {
 	logrus.Debugf("will connect to mysql")
 
 	DSN := dsnFromConnectionInfo(connectionInfo)
@@ -160,7 +175,7 @@ func connectMySQL(connectionInfo ConnectionInfo, poolsize int, metrics Metrics, 
 	c.SetMaxIdleConns(poolsize)
 	c.SetMaxOpenConns(poolsize)
 	c.SetConnMaxLifetime(360 * time.Second)
-	return &ExecuteMySQL{Con: c, Metrics: metrics}, c, nil
+	return &ExecuteMySQL{Con: c, Metrics: metrics}, nil
 }
 
 func dsnFromConnectionInfo(connectionInfo ConnectionInfo) string {
@@ -182,7 +197,7 @@ func (e ExecuteMySQL) AutoMigrateUP(folder string) error {
 		logrus.Errorf("Failed to create migration connection %s", err)
 		return err
 	}
-	m, _ := migrate.NewWithDatabaseInstance(
+	m, err := migrate.NewWithDatabaseInstance(
 		fmt.Sprintf("file://%s/mysql/", folder),
 		"mysql",
 		driver,
@@ -210,7 +225,7 @@ func (e ExecuteMySQL) AutoMigrateDown(folder string) error {
 		logrus.Errorf("Failed to create migration connection %s", err)
 		return err
 	}
-	m, _ := migrate.NewWithDatabaseInstance(
+	m, err := migrate.NewWithDatabaseInstance(
 		fmt.Sprintf("file://%s/mysql/", folder),
 		"mysql",
 		driver,
@@ -221,7 +236,7 @@ func (e ExecuteMySQL) AutoMigrateDown(folder string) error {
 		return err
 	}
 
-	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
+	if err := m.Down(); err != nil && err != migrate.ErrNoChange {
 		logrus.Errorf("Failed to migrate db: %s", err)
 		return err
 	}
@@ -231,4 +246,15 @@ func (e ExecuteMySQL) AutoMigrateDown(folder string) error {
 
 func (l *ExecuteMySQL) Shutdown(context context.Context) {
 	logrus.Info("Shuttingdown longterm mysql server")
+}
+
+func stringInterfaceToMySQLQuery(s interface{}, label string) string {
+	set := strings.Split(s.(string), ",")
+
+	switch label {
+	case "read":
+		return fmt.Sprintf("select id,k,c,pad from %s where id=UID_TO_BIN('%s');", set[0], set[1])
+	}
+	return fmt.Sprintf("INSERT INTO %s(id, k, c , pad) VALUES (UUID_TO_BIN('%s'),UUID_TO_BIN('%s'),'%s','%s');", set[0], set[1], set[2], set[2], set[2])
+
 }

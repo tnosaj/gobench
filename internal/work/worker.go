@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/sirupsen/logrus"
-	"gitlab.otters.xyz/jason.tevnan/gobench/internal"
-	"gitlab.otters.xyz/jason.tevnan/gobench/internal/strategy"
+	"github.com/tnosaj/gobench/internal"
+	"github.com/tnosaj/gobench/internal/strategy"
 )
 
 // ExecutionType defines how long queries are run
@@ -15,10 +15,9 @@ type ExecutionType interface {
 }
 
 // Start running
-func Start(s internal.Settings, st strategy.ExecutionStrategy) {
+func Start(s *internal.Settings, st strategy.ExecutionStrategy) {
 
 	wp := newWorkerPool(s.Concurrency, s.Rate)
-
 	st.UpdateSettings(s)
 	switch s.Action {
 	case "prepare":
@@ -53,6 +52,7 @@ func newWorkerPool(poolsize, rate int) *workerPool {
 		wg.Add(1)
 
 		go func() {
+
 			defer wg.Done()
 			for f := range ch {
 				f()

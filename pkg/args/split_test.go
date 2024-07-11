@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"gitlab.otters.xyz/jason.tevnan/gobench/pkg/args"
+	"github.com/tnosaj/gobench/pkg/args"
 )
 
 func Test(t *testing.T) {

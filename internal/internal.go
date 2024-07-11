@@ -1,11 +1,10 @@
 package internal
 
 import (
-	"database/sql"
 	"fmt"
 
-	"gitlab.otters.xyz/jason.tevnan/gobench/internal/db"
-	"gitlab.otters.xyz/jason.tevnan/gobench/pkg/args"
+	"github.com/tnosaj/gobench/internal/db"
+	"github.com/tnosaj/gobench/pkg/args"
 )
 
 // Settings contains global settings
@@ -20,11 +19,12 @@ type Settings struct {
 
 	Action             string
 	DB                 string
-	DBConnection       *sql.DB
 	DBConnectionInfo   db.ConnectionInfo
 	DurationType       string
 	Port               string
 	SqlMigrationFolder string
+
+	TmpFile string
 
 	Strategy string
 
@@ -33,6 +33,8 @@ type Settings struct {
 	DBInterface    db.DB
 	ReadWriteSplit args.ReadWriteSplit
 	Randomizer     Random
+
+	ServerStatus string
 }
 
 // Random interface to help with testing

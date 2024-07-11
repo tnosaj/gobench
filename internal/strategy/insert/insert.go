@@ -1,10 +1,11 @@
 package insert
 
 import (
+	"context"
 	"strconv"
 
 	"github.com/sirupsen/logrus"
-	"gitlab.otters.xyz/jason.tevnan/gobench/internal"
+	"github.com/tnosaj/gobench/internal"
 )
 
 // Row of work
@@ -20,6 +21,7 @@ type InsertReadWrite struct {
 	S          *internal.Settings
 	MaxIDCount int
 	TableName  string
+	Values     []string
 }
 
 func MakeInsertStrategy(s *internal.Settings) *InsertReadWrite {
@@ -40,8 +42,20 @@ func MakeInsertStrategy(s *internal.Settings) *InsertReadWrite {
 	}
 }
 
-func (st *InsertReadWrite) UpdateSettings(s internal.Settings) {
-	st.S = &s
+func (st *InsertReadWrite) PopulateExistingValues(v []string) {
+	st.Values = v
+}
+
+func (st *InsertReadWrite) ReturnExistingValues() []string {
+	return st.Values
+}
+
+func (st *InsertReadWrite) Shutdown(c context.Context) {
+	st.Shutdown(c)
+}
+
+func (st *InsertReadWrite) UpdateSettings(s *internal.Settings) {
+	st.S = s
 }
 
 // CreateCommand do stuffs

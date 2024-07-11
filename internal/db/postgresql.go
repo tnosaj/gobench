@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	_ "github.com/lib/pq"
@@ -25,11 +26,25 @@ type ExecutePostSQL struct {
 }
 
 // ExecStatement will execute a statement 's' and track it under the label 'l'
-func (e ExecutePostSQL) ExecStatement(statement, label string) error {
+func (e ExecutePostSQL) ExecStatement(statement interface{}, label string) error {
 	logrus.Debugf("will execut %q", statement)
 	timer := prometheus.NewTimer(e.Metrics.DBRequestDuration.WithLabelValues(label))
 
-	_, err := e.Con.Exec(statement)
+	_, err := e.Con.Exec(statement.(string))
+	if err != nil {
+		e.Metrics.DBErrorRequests.WithLabelValues(label).Inc()
+		return fmt.Errorf("could not execute %q with error %q", statement, err)
+	}
+	timer.ObserveDuration()
+	return nil
+}
+
+// ExecStatement will execute a statement 's' and track it under the label 'l'
+func (e ExecutePostSQL) ExecInterfaceStatement(statement interface{}, label string) error {
+	logrus.Tracef("will execut %q", statement)
+	timer := prometheus.NewTimer(e.Metrics.DBRequestDuration.WithLabelValues(label))
+
+	_, err := e.Con.Exec(stringInterfaceToPostgreSQLQuery(statement, label))
 	if err != nil {
 		e.Metrics.DBErrorRequests.WithLabelValues(label).Inc()
 		return fmt.Errorf("could not execute %q with error %q", statement, err)
@@ -112,7 +127,7 @@ func (e ExecutePostSQL) Ping() error {
 	return nil
 }
 
-func connectPostgreSQL(connectionInfo ConnectionInfo, poolsize int, metrics Metrics, tlsCerts TLSCerts) (*ExecutePostSQL, *sql.DB, error) {
+func connectPostgreSQL(connectionInfo ConnectionInfo, poolsize int, metrics Metrics, tlsCerts TLSCerts) (*ExecutePostSQL, error) {
 	logrus.Debugf("will connect to postgres")
 
 	var psqlInfo string
@@ -146,7 +161,7 @@ func connectPostgreSQL(connectionInfo ConnectionInfo, poolsize int, metrics Metr
 	c.SetMaxIdleConns(poolsize)
 	c.SetMaxOpenConns(poolsize)
 	c.SetConnMaxLifetime(360 * time.Second)
-	return &ExecutePostSQL{Con: c, Metrics: metrics}, c, nil
+	return &ExecutePostSQL{Con: c, Metrics: metrics}, nil
 }
 
 func psqlInfoFromConnectionInfo(connectionInfo ConnectionInfo) string {
@@ -214,4 +229,15 @@ func (e ExecutePostSQL) AutoMigrateDown(folder string) error {
 
 func (l *ExecutePostSQL) Shutdown(context context.Context) {
 	logrus.Info("Shuttingdown longterm postgres server")
+}
+
+func stringInterfaceToPostgreSQLQuery(s interface{}, label string) string {
+	set := strings.Split(s.(string), ",")
+
+	switch label {
+	case "read":
+		return fmt.Sprintf("select id,k,c,pad from %s where id='%s';", set[0], set[1])
+	}
+	return fmt.Sprintf("INSERT INTO %s(id, k, c , pad) VALUES ('%s','%s','%s','%s');", set[0], set[1], set[2], set[2], set[2])
+
 }

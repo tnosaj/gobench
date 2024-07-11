@@ -1,8 +1,7 @@
-package insert
+package lookup
 
 import (
 	"fmt"
-	"strconv"
 	"sync"
 
 	"github.com/sirupsen/logrus"
@@ -15,27 +14,27 @@ import (
 // * sk index
 
 // Prepare stuff
-func (st *InsertReadWrite) Prepare() {
+func (a *Lookup) Prepare() {
 	logrus.Infof("prepare")
-
-	err := st.S.DBInterface.AutoMigrateUP(fmt.Sprintf("%s/insert", st.S.SqlMigrationFolder))
+	a.S.ServerStatus = "busy"
+	err := a.S.DBInterface.AutoMigrateUP(fmt.Sprintf("%s/lookup", a.S.SqlMigrationFolder))
 	if err != nil {
 		logrus.Errorf("Error when migrating: %q", err)
 	}
-	st.bulkInsert()
+	a.bulkInsert()
 	logrus.Infof("Done")
 }
 
-func (st *InsertReadWrite) bulkInsert() {
+func (a *Lookup) bulkInsert() {
 	wg := sync.WaitGroup{}
 	ch := make(chan int)
-	for i := 0; i < st.S.Concurrency; i++ {
+	for i := 0; i < a.S.Concurrency; i++ {
 		wg.Add(1)
 
 		go func() {
 			defer wg.Done()
 			for range ch {
-				err := dbinsert(st.S, st.TableName)
+				err := a.dbinsert(a.S, a.StorageLocation)
 				if err != nil {
 					logrus.Warnf("Error inserting: %s", err)
 				}
@@ -43,16 +42,17 @@ func (st *InsertReadWrite) bulkInsert() {
 		}()
 	}
 
-	for i := 0; i < st.S.Initialdatasize; i++ {
+	for i := 0; i < a.S.Initialdatasize; i++ {
 		ch <- i
 	}
 	close(ch)
 	wg.Wait()
+	a.S.ServerStatus = "free"
 }
 
-func dbinsert(s *internal.Settings, tableName string) error {
-	r := generateRow(s.Randomizer)
-	err := s.DBInterface.ExecStatement("INSERT INTO "+tableName+"(k, c , pad) VALUES ("+strconv.Itoa(r.K)+",'"+r.C+"','"+r.Pad+"');", "blkinsert")
+func (a *Lookup) dbinsert(s *internal.Settings, tableName string) error {
+	r := a.create()
+	err := s.DBInterface.ExecInterfaceStatement(r, "blkinsert")
 	if err != nil {
 		logrus.Warnf("Error %s when inserting row into %s table. Values: %+v)", err, tableName, r)
 		return err

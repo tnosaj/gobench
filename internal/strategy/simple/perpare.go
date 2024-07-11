@@ -6,7 +6,7 @@ import (
 	"sync"
 
 	"github.com/sirupsen/logrus"
-	"gitlab.otters.xyz/jason.tevnan/gobench/internal"
+	"github.com/tnosaj/gobench/internal"
 )
 
 // create basic prepare
@@ -29,7 +29,7 @@ func (st *SimpleReadWrite) Prepare() {
 func (st *SimpleReadWrite) bulkInsert() {
 	wg := sync.WaitGroup{}
 	ch := make(chan int)
-	for i := 0; i < 20; i++ {
+	for i := 0; i < st.S.Concurrency; i++ {
 		wg.Add(1)
 
 		go func() {

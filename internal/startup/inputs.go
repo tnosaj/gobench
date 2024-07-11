@@ -6,9 +6,9 @@ import (
 	"os"
 
 	"github.com/sirupsen/logrus"
-	"gitlab.otters.xyz/jason.tevnan/gobench/internal"
-	"gitlab.otters.xyz/jason.tevnan/gobench/internal/helper"
-	"gitlab.otters.xyz/jason.tevnan/gobench/pkg/args"
+	"github.com/tnosaj/gobench/internal"
+	"github.com/tnosaj/gobench/internal/helper"
+	"github.com/tnosaj/gobench/pkg/args"
 )
 
 // EvaluateInputs checks for sanity
@@ -25,6 +25,8 @@ func EvaluateInputs() (internal.Settings, error) {
 	flag.StringVar(&s.TLSCerts.ClientCertificate, "clientcert", "none", "/path/to/client-certificate.pem if using tls")
 	flag.StringVar(&s.TLSCerts.ClientKey, "clientkey", "none", "/path/to/client-key.key if using tls")
 	flag.StringVar(&s.DurationType, "duration", "events", "Duratation type - events|seconds")
+
+	flag.StringVar(&s.TmpFile, "tmpfile", "none", "/path/to/tmpfile to seed existing data")
 
 	flag.IntVar(&s.Concurrency, "t", 1, "Concurrent number of threads to run")
 	flag.IntVar(&s.Connectionpoolsize, "c", 20, "Connection pool size")
@@ -77,9 +79,11 @@ func EvaluateInputs() (internal.Settings, error) {
 	}
 
 	acceptedDBs := map[string]bool{
-		"mysql":    true,
-		"postgres": true,
-		"nulldb":   true,
+		"aerospike": true,
+		"cassandra": true,
+		"mysql":     true,
+		"postgres":  true,
+		"nulldb":    true,
 	}
 	if !acceptedDBs[s.DB] {
 		return internal.Settings{}, fmt.Errorf("Unknown db engine specified: %q", s.DB)
@@ -118,10 +122,10 @@ func EvaluateInputs() (internal.Settings, error) {
 
 func getEnvVar(envVarName string) (string, error) {
 	check := os.Getenv(envVarName)
-	// if check == "" {
-	// 	printRequiredEnvVars()
-	// 	return "", fmt.Errorf("Missing env var %q", envVarName)
-	// }
+	if check == "" {
+		printRequiredEnvVars()
+		return "", fmt.Errorf("Missing env var %q", envVarName)
+	}
 	return check, nil
 }
 

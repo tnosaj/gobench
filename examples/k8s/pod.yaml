@@ -20,32 +20,36 @@ spec:
         - name: DBUSER
           valueFrom:
             secretKeyRef:
-              name: cluster-example-custom-app
-              key: username
+              name: gobench
+              key: user
         - name: DBPASSWORD
           valueFrom:
             secretKeyRef:
-              name: cluster-example-custom-app
+              name: gobench
               key: password
         - name: DBHOSTNAME
-          value: "cluster-example-custom-rw.default"
+          valueFrom:
+            secretKeyRef:
+              name: gobench
+              key: hostname
         - name: DBNAME
           value: "sbtest"
         - name: DBPORT
-          value: "5432"
+          value: "3306"
         - name: DBENGINE
-          value: "postgres"
+          value: "mysql"
         ports:
         - name: web
           containerPort: 8080
----
-apiVersion: monitoring.coreos.com/v1
-kind: PodMonitor
-metadata:
-  name: gobench
-spec:
-  selector:
-    matchLabels:
-      app: gobench
-  podMetricsEndpoints:
-  - port: web
+      - name: prometheus
+        image: prom/prometheus
+        ports:
+        - name: prom
+          containerPort: 9090
+        volumeMounts:
+          - name: config-volume
+            mountPath: /etc/prometheus
+      volumes:
+        - name: config-volume
+          configMap:
+            name: prometheus-config

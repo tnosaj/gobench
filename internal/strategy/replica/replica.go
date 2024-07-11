@@ -1,13 +1,14 @@
 package replica
 
 import (
+	"context"
 	"fmt"
 	"math/rand"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
-	"gitlab.otters.xyz/jason.tevnan/gobench/internal"
+	"github.com/tnosaj/gobench/internal"
 )
 
 // Row of work
@@ -37,6 +38,7 @@ type ReplicaReadWrite struct {
 	TableName string
 	Regions   [20]string
 	Assets    []string
+	Values    []string
 }
 
 func MakeReplicaStrategy(s *internal.Settings) *ReplicaReadWrite {
@@ -56,8 +58,20 @@ func MakeReplicaStrategy(s *internal.Settings) *ReplicaReadWrite {
 	}
 }
 
-func (st *ReplicaReadWrite) UpdateSettings(s internal.Settings) {
-	st.S = &s
+func (st *ReplicaReadWrite) PopulateExistingValues(v []string) {
+	st.Values = v
+}
+
+func (st *ReplicaReadWrite) ReturnExistingValues() []string {
+	return st.Values
+}
+
+func (st *ReplicaReadWrite) Shutdown(c context.Context) {
+	st.Shutdown(c)
+}
+
+func (st *ReplicaReadWrite) UpdateSettings(s *internal.Settings) {
+	st.S = s
 }
 
 // CreateCommand do stuffs
@@ -117,7 +131,7 @@ func (st *ReplicaReadWrite) getSk() string {
 
 // insert one record
 func (st *ReplicaReadWrite) create() string {
-	r := generateRow(st.S.Randomizer)
+	r := generateRow()
 	r.Region_id = st.getRandomRegion()
 	st.Assets = append(st.Assets, r.ID)
 	return fmt.Sprintf("INSERT INTO %s (id, driver_id, connected, created_at, loc, bearing, altitude, region_id, queue_zone_id, queue_zone_left_id, queue_zone_left_at, queue_zone_hit_at, queue_zone_loc, loc_ts, speed, alu_serial, snoozed_at) VALUES ('%s','%s',%t,'%s',ST_GeomFromText('POINT(%f %f)'),%f,%f,'%s','%s','%s','%s','%s',ST_GeomFromText('POINT(%f %f)'),'%s',%f,%d,'%s');",
@@ -131,7 +145,7 @@ func (st *ReplicaReadWrite) create() string {
 
 // update one record
 func (st *ReplicaReadWrite) update() string {
-	r := generateRow(st.S.Randomizer)
+	r := generateRow()
 	r.Region_id = st.getRandomRegion()
 	r.ID = st.getRandomAsset()
 	return fmt.Sprintf("UPDATE %s SET bearing=%f, loc=ST_GeomFromText('POINT(%f %f)'), loc_ts='%s' WHERE id='%s';", st.TableName, r.Bearing, r.Loc[0], r.Loc[1], r.ID, time.Now().Format("2006-01-02 15:04:05"))
@@ -154,7 +168,7 @@ func (st *ReplicaReadWrite) getRandomAsset() string {
 }
 
 // generateRow returns a row
-func generateRow(rand internal.Random) Row {
+func generateRow() Row {
 	s := uuid.NewString()
 	d := randomDate()
 	r32 := randomFloat32()
