@@ -11,7 +11,7 @@ type ExecutionStrategy interface {
 	Prepare()
 	RunCommand()
 	Cleanup()
-	UpdateSettings(internal.Settings)
+	UpdateSettings(*internal.Settings)
 	Shutdown(context.Context)
 
 	PopulateExistingValues([]string)

@@ -17,6 +17,20 @@ func (s *GobenchServer) Status(w http.ResponseWriter, r *http.Request) {
 	io.WriteString(w, `{"status": "ok"}`)
 }
 
+func (s *GobenchServer) RunStatus(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	if s.Settings.ServerStatus == "free" {
+		logrus.Debug("Server Free")
+		w.WriteHeader(http.StatusOK)
+		io.WriteString(w, `{"status": "ok"}`)
+		return
+	}
+	logrus.Debug("Server Busy")
+	w.WriteHeader(http.StatusTeapot)
+	io.WriteString(w, `{"status": "busy"}`)
+
+}
+
 func (s *GobenchServer) Prepare(w http.ResponseWriter, r *http.Request) {
 	logrus.Debugf("Prepare request")
 	var err error
@@ -25,7 +39,7 @@ func (s *GobenchServer) Prepare(w http.ResponseWriter, r *http.Request) {
 		returnError(w, err, http.StatusInternalServerError)
 		return
 	}
-	go work.Start(s.Settings, s.Strategy)
+	go work.Start(&s.Settings, s.Strategy)
 	return
 }
 
@@ -37,7 +51,7 @@ func (s *GobenchServer) Run(w http.ResponseWriter, r *http.Request) {
 		returnError(w, err, http.StatusInternalServerError)
 		return
 	}
-	go work.Start(s.Settings, s.Strategy)
+	go work.Start(&s.Settings, s.Strategy)
 	return
 }
 
@@ -49,7 +63,7 @@ func (s *GobenchServer) Cleanup(w http.ResponseWriter, r *http.Request) {
 		returnError(w, err, http.StatusInternalServerError)
 		return
 	}
-	go work.Start(s.Settings, s.Strategy)
+	go work.Start(&s.Settings, s.Strategy)
 	return
 }
 

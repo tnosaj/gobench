@@ -37,7 +37,7 @@ func (e ExecuteAerospike) ExecStatement(statement interface{}, label string) err
 
 // ExecStatement will execute a statement 's' and track it under the label 'l'
 func (e ExecuteAerospike) ExecInterfaceStatement(statement interface{}, label string) error {
-	logrus.Debugf("will execut %q", statement)
+	logrus.Tracef("will execut %q", statement)
 	data := stringToAerospikeData(statement)
 	key, _ := as.NewKey(data.namespace, data.setname, data.key)
 	timer := prometheus.NewTimer(e.Metrics.DBRequestDuration.WithLabelValues(label))

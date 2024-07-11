@@ -1,0 +1,6 @@
+CREATE TABLE sbtest ( 
+  id uuid PRIMARY KEY, 
+  k uuid NOT NULL, 
+  c VARCHAR NOT NULL DEFAULT '', 
+  pad VARCHAR NOT NULL DEFAULT ''
+); 

@@ -2,8 +2,6 @@ package db
 
 import (
 	"context"
-	"fmt"
-	"strings"
 
 	"github.com/prometheus/client_golang/prometheus"
 )
@@ -59,7 +57,7 @@ func Connect(db string, connectionInfo ConnectionInfo, poolsize int, tls TLSCert
 			Name: "database_error_requests",
 			Help: "The total number of failed requests",
 		},
-		[]string{"method"},
+		[]string{"query"},
 	)
 
 	prometheus.MustRegister(databaseRequestDuration)
@@ -82,7 +80,7 @@ func Connect(db string, connectionInfo ConnectionInfo, poolsize int, tls TLSCert
 			DBErrorRequests:   databaseErrorReuests,
 		}, tls)
 	case "cassandra":
-		return connectCassandra(connectionInfo, Metrics{
+		return connectCassandra(connectionInfo, poolsize, Metrics{
 			DBRequestDuration: databaseRequestDuration,
 			DBErrorRequests:   databaseErrorReuests,
 		}, tls)
@@ -93,15 +91,4 @@ func Connect(db string, connectionInfo ConnectionInfo, poolsize int, tls TLSCert
 		}}, nil
 
 	}
-}
-
-func stringInterfaceToSQLQuery(s interface{}, label string) string {
-	set := strings.Split(s.(string), ",")
-
-	switch label {
-	case "read":
-		return fmt.Sprintf("select id,k,c,pad from %s where id='%s';", set[0], set[1])
-	}
-	return fmt.Sprintf("INSERT INTO %s(k, c , pad) VALUES ('%s','%s','%s',);", set[0], set[1], set[2], set[2])
-
 }

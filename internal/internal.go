@@ -33,6 +33,8 @@ type Settings struct {
 	DBInterface    db.DB
 	ReadWriteSplit args.ReadWriteSplit
 	Randomizer     Random
+
+	ServerStatus string
 }
 
 // Random interface to help with testing

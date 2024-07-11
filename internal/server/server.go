@@ -31,7 +31,7 @@ type HttpSettings struct {
 }
 
 func NewGobenchServer(settings internal.Settings) GobenchServer {
-	logrus.Info("started server")
+	logrus.Info("starting server")
 
 	var st strategy.ExecutionStrategy
 
@@ -50,17 +50,27 @@ func NewGobenchServer(settings internal.Settings) GobenchServer {
 	var values []string
 
 	if settings.TmpFile != "none" {
+		if _, err := os.Stat(fmt.Sprintf("%s-bac", settings.TmpFile)); err == nil {
+			logrus.Fatalf("Unclean shutdown, tmpfile still exists: %s", fmt.Sprintf("%s-bac", settings.TmpFile))
+		}
 		if _, err := os.Stat(settings.TmpFile); errors.Is(err, os.ErrNotExist) {
-			logrus.Debug("Tmpfile does not exist on startup")
+			logrus.Info("Tmpfile does not exist on startup")
 		} else {
-			logrus.Debugf("Tmpfile exists on startup, reading")
+			logrus.Info("Tmpfile exists on startup, reading")
 			values, err = readLines(settings.TmpFile)
 			if err != nil {
 				logrus.Errorf("There was a problem reading the tmpfile into memory: %s", err)
 			}
+			err = os.Rename(settings.TmpFile, fmt.Sprintf("%s-bac", settings.TmpFile))
+			if err != nil {
+				logrus.Errorf("There was a problem moving the tmpfile to backup: %s", err)
+			}
+			logrus.Info("finished reading tmpfile")
 		}
 	}
 	st.PopulateExistingValues(values)
+	settings.ServerStatus = "free"
+	logrus.Info("startup server complete")
 	return GobenchServer{Settings: settings, Strategy: st}
 }
 
@@ -68,10 +78,15 @@ func (gbs *GobenchServer) Shutdown(context context.Context) {
 	logrus.Debug("Shutting down gobenchserver")
 	list := gbs.Strategy.ReturnExistingValues()
 	if gbs.Settings.TmpFile != "none" && len(list) > 0 {
+		logrus.Info("start writting tmp file")
 		err := writeLines(list, gbs.Settings.TmpFile)
-
 		if err != nil {
 			logrus.Errorf("There was a problem writting the tmpfile onto disk: %s", err)
+		}
+		logrus.Info("end writting tmp file")
+		e := os.Remove(fmt.Sprintf("%s-bac", gbs.Settings.TmpFile))
+		if e != nil {
+			logrus.Errorf("There was a problem removing backup tmpfile from disk: %s", err)
 		}
 	}
 	gbs.Strategy.Shutdown(context)

@@ -28,7 +28,7 @@ func (a *Lookup) Prepare() {
 func (a *Lookup) bulkInsert() {
 	wg := sync.WaitGroup{}
 	ch := make(chan int)
-	for i := 0; i < 20; i++ {
+	for i := 0; i < a.S.Concurrency; i++ {
 		wg.Add(1)
 
 		go func() {

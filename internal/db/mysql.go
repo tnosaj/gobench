@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/go-sql-driver/mysql"
@@ -41,10 +42,10 @@ func (e ExecuteMySQL) ExecStatement(statement interface{}, label string) error {
 
 // ExecStatement will execute a statement 's' and track it under the label 'l'
 func (e ExecuteMySQL) ExecInterfaceStatement(statement interface{}, label string) error {
-	logrus.Debugf("will execut %q", statement)
+	logrus.Tracef("will execut %q", statement)
 	timer := prometheus.NewTimer(e.Metrics.DBRequestDuration.WithLabelValues(label))
 
-	_, err := e.Con.Exec(stringInterfaceToSQLQuery(statement, label))
+	_, err := e.Con.Exec(stringInterfaceToMySQLQuery(statement, label))
 	if err != nil {
 		e.Metrics.DBErrorRequests.WithLabelValues(label).Inc()
 		return fmt.Errorf("could not execute %q with error %q", statement, err)
@@ -245,4 +246,15 @@ func (e ExecuteMySQL) AutoMigrateDown(folder string) error {
 
 func (l *ExecuteMySQL) Shutdown(context context.Context) {
 	logrus.Info("Shuttingdown longterm mysql server")
+}
+
+func stringInterfaceToMySQLQuery(s interface{}, label string) string {
+	set := strings.Split(s.(string), ",")
+
+	switch label {
+	case "read":
+		return fmt.Sprintf("select id,k,c,pad from %s where id=UID_TO_BIN('%s');", set[0], set[1])
+	}
+	return fmt.Sprintf("INSERT INTO %s(id, k, c , pad) VALUES (UUID_TO_BIN('%s'),UUID_TO_BIN('%s'),'%s','%s');", set[0], set[1], set[2], set[2], set[2])
+
 }

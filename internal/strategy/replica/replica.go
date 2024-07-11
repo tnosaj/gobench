@@ -70,8 +70,8 @@ func (st *ReplicaReadWrite) Shutdown(c context.Context) {
 	st.Shutdown(c)
 }
 
-func (st *ReplicaReadWrite) UpdateSettings(s internal.Settings) {
-	st.S = &s
+func (st *ReplicaReadWrite) UpdateSettings(s *internal.Settings) {
+	st.S = s
 }
 
 // CreateCommand do stuffs

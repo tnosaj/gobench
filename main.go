@@ -50,6 +50,7 @@ func main() {
 	router := mux.NewRouter()
 	router.Handle("/metrics", promhttp.Handler())
 	router.HandleFunc("/status", server.Status).Methods("GET")
+	router.HandleFunc("/busy", server.RunStatus).Methods("GET")
 	router.HandleFunc("/prepare", server.Prepare).Methods("POST")
 	router.HandleFunc("/run", server.Run).Methods("POST")
 	router.HandleFunc("/cleanup", server.Cleanup).Methods("POST")

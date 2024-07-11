@@ -54,8 +54,8 @@ func (st *InsertReadWrite) Shutdown(c context.Context) {
 	st.Shutdown(c)
 }
 
-func (st *InsertReadWrite) UpdateSettings(s internal.Settings) {
-	st.S = &s
+func (st *InsertReadWrite) UpdateSettings(s *internal.Settings) {
+	st.S = s
 }
 
 // CreateCommand do stuffs

@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 
-	"github.com/google/uuid"
+	"github.com/samborkent/uuid"
 	"github.com/sirupsen/logrus"
 	"github.com/tnosaj/gobench/internal"
 )
@@ -51,8 +51,8 @@ func (a *Lookup) Shutdown(c context.Context) {
 	a.S.DBInterface.Shutdown(c)
 }
 
-func (a *Lookup) UpdateSettings(s internal.Settings) {
-	a.S = &s
+func (a *Lookup) UpdateSettings(s *internal.Settings) {
+	a.S = s
 }
 
 // CreateCommand do stuffs
@@ -63,33 +63,46 @@ func (a *Lookup) RunCommand() {
 	// w:0   - 100
 	switch {
 	case x <= a.S.ReadWriteSplit.Reads:
-		logrus.Debugf("Will perform read")
+		logrus.Tracef("Will perform read")
 		a.S.DBInterface.ExecInterfaceStatement(a.read())
 	default:
-		logrus.Debugf("Will perform write")
+		logrus.Tracef("Will perform write")
 		a.S.DBInterface.ExecInterfaceStatement(a.write())
 	}
 
 }
 
 func (a *Lookup) read() (string, string) {
-	logrus.Debugf("Will perform getRandom")
-	return a.getRandom(), "read"
+	logrus.Tracef("Will perform getRandom")
+	// 50:50::hit:miss ratio
+	if a.S.Randomizer.Intn(100) <= 50 {
+		return a.getRandom(), "read"
+	}
+	return a.getFailingRandom(), "read"
 
 }
 
 func (a *Lookup) write() (string, string) {
-	logrus.Debugf("Will perform insert")
+	logrus.Tracef("Will perform insert")
 	return a.create(), "write"
 
 }
 
-// select by primary key
+// select by primary key from existing list
 func (a *Lookup) getRandom() string {
 	var b bytes.Buffer
 	b.WriteString(a.StorageLocation)
 	b.WriteString(",")
 	b.WriteString(a.randomUUIDFromList(a.S.Randomizer))
+	return b.String()
+}
+
+// failing select by pk
+func (a *Lookup) getFailingRandom() string {
+	var b bytes.Buffer
+	b.WriteString(a.StorageLocation)
+	b.WriteString(",")
+	b.WriteString(uuid.New().String())
 	return b.String()
 }
 

@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -30,19 +31,32 @@ func (e ExecuteCassandra) ExecStatement(statement interface{}, label string) err
 
 // ExecStatement will execute a statement 's' and track it under the label 'l'
 func (e ExecuteCassandra) ExecInterfaceStatement(statement interface{}, label string) error {
-	logrus.Debugf("will execut %q", statement)
+	logrus.Tracef("will execut %q", statement)
 
 	set := strings.Split(statement.(string), ",")
 	timer := prometheus.NewTimer(e.Metrics.DBRequestDuration.WithLabelValues(label))
 	var err error
+	var (
+		id  gocql.UUID
+		k   gocql.UUID
+		c   string
+		pad string
+	)
 	switch label {
 	case "read":
-		err = e.Con.Query(fmt.Sprintf("select id,k,c,pad from %s where id=?;", set[0]), set[1]).Consistency(gocql.One).Scan()
+		err = e.Con.Query(fmt.Sprintf("select id,k,c,pad from %s where id=?;", set[0]), set[1]).Consistency(gocql.One).Scan(&id, &k, &c, &pad)
 	default:
 		err = e.Con.Query(fmt.Sprintf("INSERT INTO %s (id, k, c, pad) VALUES (?,?,?,?);", set[0]), set[1], set[1], set[2], set[2]).Exec()
 	}
 	timer.ObserveDuration()
 	if err != nil {
+		if errors.Is(err, gocql.ErrNotFound) {
+			logrus.Tracef("error: %s", err.Error())
+			// not an error, but we want to count it
+			e.Metrics.DBErrorRequests.WithLabelValues(fmt.Sprintf("%s-404", label)).Inc()
+			return nil
+		}
+		logrus.Warnf("error: %s", err.Error())
 		e.Metrics.DBErrorRequests.WithLabelValues(label).Inc()
 		return fmt.Errorf("could not execute %q with error %q", statement, err)
 	}
@@ -83,12 +97,12 @@ func (e ExecuteCassandra) Ping() error {
 	return nil
 }
 
-func connectCassandra(connectionInfo ConnectionInfo, metrics Metrics, tlsCerts TLSCerts) (*ExecuteCassandra, error) {
+func connectCassandra(connectionInfo ConnectionInfo, poolsize int, metrics Metrics, tlsCerts TLSCerts) (*ExecuteCassandra, error) {
 	logrus.Debugf("will connect to Cassandra")
 
-	//hostsList := strings.Split(connectionInfo.HostName, ",")
+	hostsList := strings.Split(connectionInfo.HostName, ",")
 
-	cluster := gocql.NewCluster("127.0.0.1:9042")
+	cluster := gocql.NewCluster(hostsList...)
 	cluster.Authenticator = gocql.PasswordAuthenticator{
 		Username: connectionInfo.User,
 		Password: connectionInfo.Password,
@@ -100,6 +114,7 @@ func connectCassandra(connectionInfo ConnectionInfo, metrics Metrics, tlsCerts T
 
 	cluster.Consistency = gocql.Quorum
 	cluster.Keyspace = connectionInfo.DBName
+	cluster.NumConns = poolsize
 
 	if tlsCerts.CaCertificate != "none" {
 		cluster.SslOpts = &gocql.SslOptions{

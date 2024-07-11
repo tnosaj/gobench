@@ -49,8 +49,8 @@ func MakeSimpleStrategy(s *internal.Settings) *SimpleReadWrite {
 	}
 }
 
-func (st *SimpleReadWrite) UpdateSettings(s internal.Settings) {
-	st.S = &s
+func (st *SimpleReadWrite) UpdateSettings(s *internal.Settings) {
+	st.S = s
 }
 
 func (st *SimpleReadWrite) PopulateExistingValues(v []string) {

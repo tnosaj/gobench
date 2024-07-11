@@ -15,7 +15,7 @@ type ExecutionType interface {
 }
 
 // Start running
-func Start(s internal.Settings, st strategy.ExecutionStrategy) {
+func Start(s *internal.Settings, st strategy.ExecutionStrategy) {
 
 	wp := newWorkerPool(s.Concurrency, s.Rate)
 	st.UpdateSettings(s)

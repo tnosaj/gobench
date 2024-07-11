@@ -29,7 +29,7 @@ func (st *SimpleReadWrite) Prepare() {
 func (st *SimpleReadWrite) bulkInsert() {
 	wg := sync.WaitGroup{}
 	ch := make(chan int)
-	for i := 0; i < 20; i++ {
+	for i := 0; i < st.S.Concurrency; i++ {
 		wg.Add(1)
 
 		go func() {
