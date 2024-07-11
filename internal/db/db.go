@@ -54,7 +54,7 @@ func Connect(db string, connectionInfo ConnectionInfo, poolsize int, tls TLSCert
 
 	databaseErrorReuests := prometheus.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: "database_error_requests",
+			Name: "database_error_request_count",
 			Help: "The total number of failed requests",
 		},
 		[]string{"query"},
