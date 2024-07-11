@@ -177,7 +177,7 @@ func psqlInfoFromConnectionInfo(connectionInfo ConnectionInfo) string {
 func (e ExecutePostSQL) AutoMigrateUP(folder string) error {
 	logrus.Debug("automatically migrating postgres")
 	driver, err := postgres.WithInstance(e.Con, &postgres.Config{
-		MigrationsTable: "users_schema_migrations",
+		MigrationsTable: "schema_migrations",
 	})
 	if err != nil {
 		logrus.Errorf("Failed to create migration connection %s", err)
@@ -203,7 +203,7 @@ func (e ExecutePostSQL) AutoMigrateUP(folder string) error {
 func (e ExecutePostSQL) AutoMigrateDown(folder string) error {
 	logrus.Debug("automatically migrating postgres")
 	driver, err := postgres.WithInstance(e.Con, &postgres.Config{
-		MigrationsTable: "users_schema_migrations",
+		MigrationsTable: "schema_migrations",
 	})
 	if err != nil {
 		logrus.Errorf("Failed to create migration connection %s", err)
