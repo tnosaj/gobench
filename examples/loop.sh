@@ -20,9 +20,6 @@ getImages () {
   curl -H "Authorization:Bearer $BEARER" "$latency" -o "$DB-latency-$action.png"
 }
 
-getImages foo bar
-
-exit 0
 echo "Looping over: $URL"
 fromPrepare=$(date +%s%3N)
 curl -s -o /dev/null "$URL/prepare" -X POST -d '{"initialdatasize":50000000}'
@@ -30,7 +27,7 @@ while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' "$URL/busy")" != "200" ]]; 
 toPrepare=$(date +%s%3N)
 echo "finished prepare"
 echo "starting concurrency 10"
-from=10$(date +%s%3N)
+from10=$(date +%s%3N)
 curl -s -o /dev/null "$URL/run" -X POST -d '{"concurrency":10,"duration":30000000}'
 while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' "$URL/busy")" != "200" ]]; do sleep 5; done
 to10=$(date +%s%3N)
