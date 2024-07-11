@@ -14,12 +14,22 @@ services:
     image: grafana/grafana
     container_name: grafana
     ports:
-      - 9091:3000
+      - 3000:3000
     restart: unless-stopped
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=grafana
+      - GF_RENDERING_SERVER_URL=http://renderer:8081/render
+      - GF_RENDERING_CALLBACK_URL=http://grafana:3000/
+      - GF_LOG_FILTERS=rendering:debug
     volumes:
-      - ./grafana:/etc/grafana/provisioning/datasources
+      - ./grafana/datasources:/etc/grafana/provisioning/datasources
+      - ./grafana/dashboard:/etc/grafana/provisioning/dashboards
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+  renderer:
+    image: grafana/grafana-image-renderer:latest
+    container_name: renderer
+    ports:
+      - 8081
 volumes:
   prom_data:
