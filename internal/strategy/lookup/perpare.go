@@ -16,7 +16,7 @@ import (
 // Prepare stuff
 func (a *Lookup) Prepare() {
 	logrus.Infof("prepare")
-
+	a.S.ServerStatus = "busy"
 	err := a.S.DBInterface.AutoMigrateUP(fmt.Sprintf("%s/lookup", a.S.SqlMigrationFolder))
 	if err != nil {
 		logrus.Errorf("Error when migrating: %q", err)
@@ -47,6 +47,7 @@ func (a *Lookup) bulkInsert() {
 	}
 	close(ch)
 	wg.Wait()
+	a.S.ServerStatus = "free"
 }
 
 func (a *Lookup) dbinsert(s *internal.Settings, tableName string) error {
