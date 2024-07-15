@@ -30,5 +30,4 @@ COPY --from=build /app/migrations /migrations
 #RUN apk add --no-cache \
 #        musl
 #
-ENTRYPOINT ["/gobench"]
-
+ENTRYPOINT ["/gobench","--strategy","lookup","-tmpfile","/gobenchdata/file","-m","/migrations"]

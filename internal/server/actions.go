@@ -31,6 +31,13 @@ func (s *GobenchServer) RunStatus(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func (s *GobenchServer) ShutdownPrep(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	s.Shutdown(r.Context())
+	w.WriteHeader(http.StatusOK)
+	io.WriteString(w, `{"status": "ok"}`)
+}
+
 func (s *GobenchServer) Prepare(w http.ResponseWriter, r *http.Request) {
 	logrus.Debugf("Prepare request")
 	var err error

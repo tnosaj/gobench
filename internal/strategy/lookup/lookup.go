@@ -78,7 +78,7 @@ func (a *Lookup) read() (string, string) {
 	if a.S.Randomizer.Intn(100) <= 50 {
 		return a.getRandom(), "read"
 	}
-	return a.getFailingRandom(), "read"
+	return a.getFailingRandom(), "read-404"
 
 }
 

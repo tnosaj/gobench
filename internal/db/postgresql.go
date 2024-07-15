@@ -235,7 +235,7 @@ func stringInterfaceToPostgreSQLQuery(s interface{}, label string) string {
 	set := strings.Split(s.(string), ",")
 
 	switch label {
-	case "read":
+	case "read", "read-404":
 		return fmt.Sprintf("select id,k,c,pad from %s where id='%s';", set[0], set[1])
 	}
 	return fmt.Sprintf("INSERT INTO %s(id, k, c , pad) VALUES ('%s','%s','%s','%s');", set[0], set[1], set[2], set[2], set[2])

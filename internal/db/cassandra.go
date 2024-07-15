@@ -43,7 +43,7 @@ func (e ExecuteCassandra) ExecInterfaceStatement(statement interface{}, label st
 		pad string
 	)
 	switch label {
-	case "read":
+	case "read", "read-404":
 		err = e.Con.Query(fmt.Sprintf("select id,k,c,pad from %s where id=?;", set[0]), set[1]).Consistency(gocql.One).Scan(&id, &k, &c, &pad)
 	default:
 		err = e.Con.Query(fmt.Sprintf("INSERT INTO %s (id, k, c, pad) VALUES (?,?,?,?);", set[0]), set[1], set[1], set[2], set[2]).Exec()

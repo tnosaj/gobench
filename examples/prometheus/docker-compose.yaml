@@ -31,5 +31,31 @@ services:
     container_name: renderer
     ports:
       - 8081
+  gobench:
+    image: tnosaj/gobench:latest
+    container_name: gobench
+    ports:
+      - 8080:8080
+    restart: unless-stopped
+    environment:
+      - DBUSER=sbtest 
+      - DBPASSWORD=mysql-1234! 
+      - DBHOSTNAME=jason-1.test.eu.id5.internal 
+      - DBPORT=3306 
+      - DBNAME=sbtest 
+      - DBENGINE=mysql
+    volumes:
+      - gobench_data:/gobenchdata
 volumes:
   prom_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: .prometheus_data
+  gobench_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: .gobench_data

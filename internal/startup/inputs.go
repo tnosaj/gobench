@@ -14,8 +14,10 @@ import (
 // EvaluateInputs checks for sanity
 func EvaluateInputs() (internal.Settings, error) {
 	var s internal.Settings
+	var verbose, veryverbose bool
 
-	flag.BoolVar(&s.Debug, "v", false, "Enable verbose debugging output")
+	flag.BoolVar(&verbose, "v", false, "Enable verbose debugging output")
+	flag.BoolVar(&veryverbose, "vv", false, "Enable verbose debugging output")
 
 	flag.StringVar(&s.Action, "a", "unset", "Perform this action, must be one of the following: prepare,run,cleanup")
 	flag.StringVar(&s.SqlMigrationFolder, "m", "/migration", "Sql Migrations Folder")
@@ -45,7 +47,7 @@ func EvaluateInputs() (internal.Settings, error) {
 
 	flag.Parse()
 
-	setupLogger(s.Debug)
+	setupLogger(verbose, veryverbose)
 
 	rws, err := args.ParseReadWriteSplit(split)
 	if err != nil {
@@ -129,13 +131,15 @@ func getEnvVar(envVarName string) (string, error) {
 	return check, nil
 }
 
-func setupLogger(debug bool) {
+func setupLogger(debug, trace bool) {
 	//logrus.SetReportCaller(true)
 	logrus.SetFormatter(&logrus.TextFormatter{
 		FullTimestamp: true,
 	})
 	if debug {
 		logrus.SetLevel(logrus.DebugLevel)
+	} else if trace {
+		logrus.SetLevel(logrus.TraceLevel)
 	} else {
 		logrus.SetLevel(logrus.InfoLevel)
 	}

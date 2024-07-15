@@ -15,8 +15,6 @@ type Settings struct {
 	Duration           int
 	Rate               int
 
-	Debug bool
-
 	Action             string
 	DB                 string
 	DBConnectionInfo   db.ConnectionInfo

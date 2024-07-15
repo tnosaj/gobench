@@ -43,7 +43,7 @@ func (e ExecuteAerospike) ExecInterfaceStatement(statement interface{}, label st
 	timer := prometheus.NewTimer(e.Metrics.DBRequestDuration.WithLabelValues(label))
 	var err as.Error
 	switch label {
-	case "read":
+	case "read", "read-404":
 		_, err = e.Con.Get(nil, key)
 	default:
 		bin := as.BinMap{"data": data.binmap}
