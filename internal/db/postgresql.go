@@ -27,7 +27,7 @@ type ExecutePostSQL struct {
 
 // ExecStatement will execute a statement 's' and track it under the label 'l'
 func (e ExecutePostSQL) ExecStatement(statement interface{}, label string) error {
-	logrus.Debugf("will execut %q", statement)
+	logrus.Tracef("will execut %q", statement)
 	timer := prometheus.NewTimer(e.Metrics.DBRequestDuration.WithLabelValues(label))
 
 	_, err := e.Con.Exec(statement.(string))

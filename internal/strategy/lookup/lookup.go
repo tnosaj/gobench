@@ -7,6 +7,7 @@ import (
 	"github.com/samborkent/uuid"
 	"github.com/sirupsen/logrus"
 	"github.com/tnosaj/gobench/internal"
+	"github.com/tnosaj/gobench/internal/cache"
 )
 
 // Row of work
@@ -22,10 +23,10 @@ type Lookup struct {
 	S               *internal.Settings
 	MaxIDCount      int
 	StorageLocation string
-	Values          []string
+	ValuesInterface cache.CacheValues
 }
 
-func MakeLookupStrategy(s *internal.Settings) *Lookup {
+func MakeLookupStrategy(s *internal.Settings, cache cache.CacheValues) *Lookup {
 	logrus.Info("creating Lookup")
 
 	tableName := "sbtest"
@@ -34,20 +35,13 @@ func MakeLookupStrategy(s *internal.Settings) *Lookup {
 		S:               s,
 		MaxIDCount:      s.Initialdatasize,
 		StorageLocation: tableName,
+		ValuesInterface: cache,
 	}
-}
-
-func (a *Lookup) PopulateExistingValues(v []string) {
-	a.Values = v
-}
-
-func (a *Lookup) ReturnExistingValues() []string {
-	return a.Values
 }
 
 func (a *Lookup) Shutdown(c context.Context) {
 	logrus.Info("shutting down strategy")
-
+	a.ValuesInterface.Save()
 	a.S.DBInterface.Shutdown(c)
 }
 
@@ -91,9 +85,13 @@ func (a *Lookup) write() (string, string) {
 // select by primary key from existing list
 func (a *Lookup) getRandom() string {
 	var b bytes.Buffer
+	uid, err := a.ValuesInterface.GetRandom()
+	if err != nil {
+		return a.getFailingRandom() // then we will just fail, thats fine
+	}
 	b.WriteString(a.StorageLocation)
 	b.WriteString(",")
-	b.WriteString(a.randomUUIDFromList(a.S.Randomizer))
+	b.WriteString(uid.String())
 	return b.String()
 }
 
@@ -108,20 +106,17 @@ func (a *Lookup) getFailingRandom() string {
 
 // insert one record
 func (a *Lookup) create() string {
-	id := uuid.New().String()
+	id := uuid.New()
 	var b bytes.Buffer
 	b.WriteString(a.StorageLocation)
 	b.WriteString(",")
-	b.WriteString(id)
+	b.WriteString(id.String())
 	b.WriteString(",")
-	b.WriteString(id)
-	a.Values = append(a.Values, id)
+	b.WriteString(id.String())
+	err := a.ValuesInterface.Put(id)
+	if err != nil {
+		logrus.Errorf("Error adding value to cache: %s", err)
+	}
 	return b.String()
-
-}
-
-func (a *Lookup) randomUUIDFromList(rand internal.Random) string {
-	randomIndex := rand.Intn(len(a.Values))
-	return a.Values[randomIndex]
 
 }

@@ -6,6 +6,7 @@ toolchain go1.22.2
 
 require (
 	github.com/aerospike/aerospike-client-go/v7 v7.4.0
+	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/gocql/gocql v1.6.0
 	github.com/golang-migrate/migrate/v4 v4.15.2
