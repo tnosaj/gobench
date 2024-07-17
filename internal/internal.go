@@ -22,7 +22,7 @@ type Settings struct {
 	Port               string
 	SqlMigrationFolder string
 
-	TmpFile string
+	CacheType string
 
 	Strategy string
 

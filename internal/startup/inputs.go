@@ -28,7 +28,7 @@ func EvaluateInputs() (internal.Settings, error) {
 	flag.StringVar(&s.TLSCerts.ClientKey, "clientkey", "none", "/path/to/client-key.key if using tls")
 	flag.StringVar(&s.DurationType, "duration", "events", "Duratation type - events|seconds")
 
-	flag.StringVar(&s.TmpFile, "tmpfile", "none", "/path/to/tmpfile to seed existing data")
+	flag.StringVar(&s.CacheType, "cache", "none", "type of cache to use: [redis|file]:[url:port|/path/to/file]")
 
 	flag.IntVar(&s.Concurrency, "t", 1, "Concurrent number of threads to run")
 	flag.IntVar(&s.Connectionpoolsize, "c", 20, "Connection pool size")
