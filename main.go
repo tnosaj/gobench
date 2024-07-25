@@ -23,7 +23,7 @@ import (
 func main() {
 
 	var wait time.Duration
-	wait = time.Second * time.Duration(10)
+	wait = time.Second * time.Duration(60)
 
 	s, err := startup.EvaluateInputs()
 	if err != nil {
