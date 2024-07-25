@@ -21,6 +21,7 @@ type GobenchServer struct {
 type HttpSettings struct {
 	SqlMigrationFolder string `json:"sqlmigrationfolder"`
 	Strategy           string `json:"strategy"`
+	Split              string `json:"split"`
 	Concurrency        int    `json:"concurrency"`
 	Initialdatasize    int    `json:"initialdatasize"`
 	Duration           int    `json:"duration"`
@@ -57,6 +58,5 @@ func NewGobenchServer(settings internal.Settings) GobenchServer {
 
 func (gbs *GobenchServer) Shutdown(context context.Context) {
 	logrus.Debug("Shutting down gobenchserver")
-
 	gbs.Strategy.Shutdown(context)
 }

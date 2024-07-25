@@ -28,8 +28,6 @@ func EvaluateInputs() (internal.Settings, error) {
 	flag.StringVar(&s.TLSCerts.ClientKey, "clientkey", "none", "/path/to/client-key.key if using tls")
 	flag.StringVar(&s.DurationType, "duration", "events", "Duratation type - events|seconds")
 
-	flag.StringVar(&s.CacheType, "cache", "none", "type of cache to use: [redis|file]:[url:port|/path/to/file]")
-
 	flag.IntVar(&s.Concurrency, "t", 1, "Concurrent number of threads to run")
 	flag.IntVar(&s.Connectionpoolsize, "c", 20, "Connection pool size")
 	flag.IntVar(&s.Initialdatasize, "i", 1000, "Initial size to populate")
@@ -78,6 +76,11 @@ func EvaluateInputs() (internal.Settings, error) {
 	s.DB, err = getEnvVar("DBENGINE")
 	if err != nil {
 		return internal.Settings{}, err
+	}
+
+	s.CacheType, err = getEnvVar("CACHE")
+	if err != nil {
+		s.CacheType = "none"
 	}
 
 	acceptedDBs := map[string]bool{

@@ -9,6 +9,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/tnosaj/gobench/internal"
 	"github.com/tnosaj/gobench/internal/work"
+	"github.com/tnosaj/gobench/pkg/args"
 )
 
 func (s *GobenchServer) Status(w http.ResponseWriter, r *http.Request) {
@@ -87,6 +88,10 @@ func (s *GobenchServer) unifySettings(r *http.Request, action string) (internal.
 	}
 	if httpsettings.Strategy != "" {
 		settings.Strategy = httpsettings.Strategy
+	}
+	if httpsettings.Split != "" {
+		rws, _ := args.ParseReadWriteSplit(httpsettings.Split)
+		settings.ReadWriteSplit = rws
 	}
 	if httpsettings.Concurrency > 0 {
 		settings.Concurrency = httpsettings.Concurrency

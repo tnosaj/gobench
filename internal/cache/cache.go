@@ -22,7 +22,7 @@ func NewCache(cache string, randomizer internal.Random) CacheValues {
 		return newNullCache()
 	case "redis":
 		if len(cacheParts) == 2 {
-			return newRedisCache(cacheParts[1], "6739", randomizer)
+			return newRedisCache(cacheParts[1], "6379", randomizer)
 		} else if len(cacheParts) == 3 {
 			return newRedisCache(cacheParts[1], cacheParts[2], randomizer)
 		}
@@ -33,6 +33,11 @@ func NewCache(cache string, randomizer internal.Random) CacheValues {
 			logrus.Fatalf("Could not split file cache into 2 parts: %s", cache)
 		}
 		return newFileCache(cacheParts[1], randomizer)
+	case "memory":
+		if len(cacheParts) != 2 {
+			logrus.Fatalf("Could not split file cache into 2 parts: %s", cache)
+		}
+		return newMemoryCache(cacheParts[1], randomizer)
 	default:
 		logrus.Fatalf("unknown cachetype: %s", cacheParts[0])
 		return nil

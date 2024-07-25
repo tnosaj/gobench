@@ -71,14 +71,11 @@ func (fc *FileCache) asyncPut(c chan uuid.UUID) {
 		}
 		logrus.Info("finished opening tmpfile")
 	}
-	w := bufio.NewWriterSize(file, 74)
+	w := bufio.NewWriter(file)
 
 	for uuid := range c {
 		fc.CacheSize++
-		//i, err := fmt.Fprintln(w, uuid)
-		i, err := w.WriteString(uuid.String() + "\n")
-		logrus.Infof("%d, %s", i, err)
-
+		w.WriteString(uuid.String() + "\n")
 	}
 	w.Flush()
 	file.Close()
@@ -86,6 +83,7 @@ func (fc *FileCache) asyncPut(c chan uuid.UUID) {
 }
 
 func (fc *FileCache) Load() error {
+	logrus.Infof("Start loading FileCache")
 	go fc.asyncPut(fc.Channel)
 	fc.CacheSize = 0
 
@@ -93,6 +91,7 @@ func (fc *FileCache) Load() error {
 	if err != nil {
 		return fmt.Errorf("Error setting up current file length: %s", err)
 	}
+	logrus.Infof("Finished loading FileCache")
 	fc.CacheSize = i
 	return nil
 }
