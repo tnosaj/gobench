@@ -8,10 +8,12 @@ global:
 # Here it's Prometheus itself.
 scrape_configs:
   # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
-  - job_name: "benchmark"
-
-    # metrics_path defaults to '/metrics'
-    # scheme defaults to 'http'.
-
+  - job_name: "gobench"
     static_configs:
-      - targets: ["172.17.0.1:8080"]
+      - targets: ["gobench:8080"]
+  - job_name: "postgres"
+    static_configs:
+      - targets: ["postgresql-exporter:9121"]
+  - job_name: "redis"
+    static_configs:
+      - targets: ["redis-exporter:9187"]
