@@ -78,9 +78,11 @@ func EvaluateInputs() (internal.Settings, error) {
 		return internal.Settings{}, err
 	}
 
-	s.CacheType, err = getEnvVar("CACHE")
-	if err != nil {
+	check := os.Getenv("CACHE")
+	if check == "" {
 		s.CacheType = "none"
+	} else {
+		s.CacheType = check
 	}
 
 	acceptedDBs := map[string]bool{

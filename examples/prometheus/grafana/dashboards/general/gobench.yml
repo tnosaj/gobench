@@ -76,7 +76,8 @@
                 "value": 80
               }
             ]
-          }
+          },
+          "unit": "s"
         },
         "overrides": []
       },
@@ -262,6 +263,6 @@
   "timezone": "utc",
   "title": "gobench",
   "uid": "ddrgi9ifi18n4c",
-  "version": 2,
+  "version": 1,
   "weekStart": ""
 }
