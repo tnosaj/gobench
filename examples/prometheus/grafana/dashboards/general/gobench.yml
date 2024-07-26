@@ -82,8 +82,8 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 12,
+        "h": 12,
+        "w": 24,
         "x": 0,
         "y": 0
       },
@@ -91,9 +91,11 @@
       "options": {
         "legend": {
           "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
+          "sortBy": "Name",
+          "sortDesc": true
         },
         "tooltip": {
           "mode": "single",
@@ -214,17 +216,17 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 0
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 12
       },
       "id": 2,
       "options": {
         "legend": {
           "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
+          "displayMode": "table",
+          "placement": "right",
           "showLegend": true
         },
         "tooltip": {
@@ -252,10 +254,24 @@
           },
           "editorMode": "code",
           "expr": "rate(database_request_duration_seconds_count[1m])",
+          "hide": false,
           "instant": false,
           "legendFormat": "{{query}}-count",
           "range": true,
           "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(database_request_duration_seconds_count{query=~\"read|read-404\"}[1m]))",
+          "hide": false,
+          "instant": false,
+          "legendFormat": "All Read types",
+          "range": true,
+          "refId": "C"
         }
       ],
       "title": "Request and error rate",
@@ -269,7 +285,7 @@
     "list": []
   },
   "time": {
-    "from": "now-30m",
+    "from": "now-5m",
     "to": "now"
   },
   "timepicker": {},
