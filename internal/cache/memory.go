@@ -2,12 +2,9 @@ package cache
 
 import (
 	"bufio"
-	"bytes"
 	"errors"
 	"fmt"
 	"os"
-	"os/exec"
-	"strconv"
 
 	"github.com/samborkent/uuid"
 	"github.com/sirupsen/logrus"
@@ -29,23 +26,9 @@ func newMemoryCache(path string, randomizer internal.Random) *MemoryCache {
 
 func (fc *MemoryCache) GetRandom() (uuid.UUID, error) {
 	logrus.Trace("MemoryCache get random")
-	cmd := exec.Command("sed",
-		"-n", strconv.Itoa(fc.Randomizer.Intn(len(fc.Cache)))+"p",
-		fc.filePath,
-	)
-	var out bytes.Buffer
-	cmd.Stdout = &out
-
-	err := cmd.Run()
-	if err != nil {
-		return uuid.NewV7(), fmt.Errorf("Error running 'sed' command: %s", err)
-	}
-
-	id, err := uuid.StringToUUID(out.String())
-	if err != nil {
-		return uuid.NewV7(), fmt.Errorf("Error converting key: %s", err)
-	}
-	return id, nil
+	randomIndex := fc.Randomizer.Intn(len(fc.Cache))
+	uid, _ := uuid.StringToUUID(fc.Cache[randomIndex])
+	return uid, nil
 }
 
 func (fc *MemoryCache) Put(uuid uuid.UUID) error {
@@ -95,7 +78,7 @@ func (fc *MemoryCache) Load() error {
 	}
 	fc.Cache = values
 
-	logrus.Infof("Finished loading MemoryCache")
+	logrus.Infof("Finished loading %d items into MemoryCache", len(fc.Cache))
 	return nil
 }
 
