@@ -53,7 +53,7 @@ func (e ExecuteCassandra) ExecInterfaceStatement(statement interface{}, label st
 		if errors.Is(err, gocql.ErrNotFound) {
 			logrus.Tracef("error: %s", err.Error())
 			// not an error, but we want to count it
-			e.Metrics.DBErrorRequests.WithLabelValues(fmt.Sprintf("%s-404", label)).Inc()
+			e.Metrics.DBErrorRequests.WithLabelValues(label).Inc()
 			return nil
 		}
 		logrus.Warnf("error: %s", err.Error())

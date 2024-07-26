@@ -38,12 +38,13 @@ services:
       - 8080:8080
     restart: unless-stopped
     environment:
-      - DBUSER=sbtest 
-      - DBPASSWORD=mysql-1234! 
-      - DBHOSTNAME=jason-1.test.eu.id5.internal 
-      - DBPORT=3306 
+      - DBUSER=admin
+      - DBPASSWORD=admin
+      - DBHOSTNAME=172.18.0.1
+      - DBPORT=9042
       - DBNAME=sbtest 
-      - DBENGINE=mysql
+      - DBENGINE=cassandra
+      - CACHE=memory:none
     volumes:
       - gobench_data:/gobenchdata
 volumes:
@@ -52,10 +53,11 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: .prometheus_data
+      device: prometheus_data
   gobench_data:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: .gobench_data
+      device: gobench_data
+

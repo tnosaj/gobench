@@ -27,7 +27,7 @@ getImages () {
 
 echo "Looping over: $URL"
 fromPrepare=$(date +%s%3N)
-curl -s -o /dev/null "$URL/prepare" -X POST -d '{"initialdatasize":500,"concurrency":15}'
+curl -s -o /dev/null "$URL/prepare" -X POST -d '{"initialdatasize":2000000,"concurrency":15}'
 while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' "$URL/busy")" != "200" ]]; do sleep 5; done
 echo "finished prepare"
 echo "Waiting until prometheus has all the data"
@@ -36,28 +36,19 @@ toPrepare=$(date +%s%3N)
 getImages "$fromPrepare" "$toPrepare" prepare
 echo "starting concurrency 10"
 from10=$(date +%s%3N)
-curl -s -o /dev/null "$URL/run" -X POST -d '{"concurrency":10,"duration":3000}'
+curl -s -o /dev/null "$URL/run" -X POST -d '{"concurrency":5,"duration":2000000}'
 while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' "$URL/busy")" != "200" ]]; do sleep 5; done
 echo "finished concurrency 10"
 echo "Waiting until prometheus has all the data"
 sleep 30
 to10=$(date +%s%3N)
-getImages "$from10" "$to10" concurrency10
+getImages "$from10" "$to10" concurrency5
 echo "starting concurrency 20"
 from20=$(date +%s%3N)
-curl -s -o /dev/null "$URL/run" -X POST -d '{"concurrency":20,"duration":3000}'
+curl -s -o /dev/null "$URL/run" -X POST -d '{"concurrency":10,"duration":2000000}'
 while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' "$URL/busy")" != "200" ]]; do sleep 5; done
 echo "finished concurrency 20"
 echo "Waiting until prometheus has all the data"
 sleep 30
 to20=$(date +%s%3N)
-getImages "$from20" "$to20" concurrency20
-echo "starting concurrency 30"
-from30=$(date +%s%3N)
-curl -s -o /dev/null "$URL/run" -X POST -d '{"concurrency":30,"duration":3000}'
-while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' "$URL/busy")" != "200" ]]; do sleep 5; done
-echo "finished concurrency 30"
-echo "Waiting until prometheus has all the data"
-sleep 30
-to30=$(date +%s%3N)
-getImages "$from30" "$to30" concurrency30
+getImages "$from20" "$to20" concurrency10
