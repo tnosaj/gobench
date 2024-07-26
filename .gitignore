@@ -1,3 +1,5 @@
 gobench
 coverage.out
 examples/k8s/
+examples/prometheus/prometheus_data/
+examples/prometheus/gobench_data/
