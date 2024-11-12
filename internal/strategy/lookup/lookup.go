@@ -41,7 +41,7 @@ func MakeLookupStrategy(s *internal.Settings, cache cache.CacheValues) *Lookup {
 
 func (a *Lookup) Shutdown(c context.Context) {
 	logrus.Info("shutting down strategy")
-	a.ValuesInterface.Save()
+	a.ValuesInterface.Save(c)
 	a.S.DBInterface.Shutdown(c)
 }
 

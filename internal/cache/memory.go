@@ -2,6 +2,7 @@ package cache
 
 import (
 	"bufio"
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -44,7 +45,7 @@ func (fc *MemoryCache) asyncPut(c chan uuid.UUID) {
 	}
 }
 
-func (fc *MemoryCache) Save() error {
+func (fc *MemoryCache) Save(c context.Context) error {
 	close(fc.Channel)
 	if fc.filePath != "none" {
 		err := writeLines(fc.Cache, fc.filePath)

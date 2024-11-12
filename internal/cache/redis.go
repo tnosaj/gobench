@@ -99,7 +99,7 @@ func (rc *RedisCache) Load() error {
 	return nil
 }
 
-func (rc *RedisCache) Save() error {
+func (rc *RedisCache) Save(c context.Context) error {
 	logrus.Info("rediscache shutting down")
 	close(rc.Channel)
 	rc.Redis.Close()

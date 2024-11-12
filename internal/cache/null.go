@@ -1,6 +1,8 @@
 package cache
 
 import (
+	"context"
+
 	"github.com/samborkent/uuid"
 	"github.com/sirupsen/logrus"
 )
@@ -28,7 +30,7 @@ func (nc *NullCache) Load() error {
 	return nil
 }
 
-func (nc *NullCache) Save() error {
+func (nc *NullCache) Save(c context.Context) error {
 	logrus.Debug("nullcache not saving anything")
 	return nil
 }
