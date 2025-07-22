@@ -22,6 +22,7 @@ import (
 // ExecutePostSQL contains the connection and metrics to track executions
 type ExecutePostSQL struct {
 	Con     *sql.DB
+	WCon    *sql.DB
 	Metrics Metrics
 }
 
@@ -43,12 +44,27 @@ func (e ExecutePostSQL) ExecStatement(statement interface{}, label string) error
 func (e ExecutePostSQL) ExecInterfaceStatement(statement interface{}, label string) error {
 	logrus.Tracef("will execut %q", statement)
 	timer := prometheus.NewTimer(e.Metrics.DBRequestDuration.WithLabelValues(label))
-
-	_, err := e.Con.Exec(stringInterfaceToPostgreSQLQuery(statement, label))
+	var timeout time.Duration
+	var connection *sql.DB
+	switch label {
+	case "read", "read-404":
+		timeout = time.Duration(time.Millisecond * 100)
+		connection = e.Con
+	default:
+		timeout = time.Duration(time.Millisecond * 200)
+		connection = e.WCon
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+	_, err := connection.ExecContext(ctx, stringInterfaceToPostgreSQLQuery(statement, label))
 	if err != nil {
+		if ctx.Err() == context.DeadlineExceeded {
+			label = fmt.Sprintf("%s-ctx", label)
+		}
 		e.Metrics.DBErrorRequests.WithLabelValues(label).Inc()
 		return fmt.Errorf("could not execute %q with error %q", statement, err)
 	}
+
 	timer.ObserveDuration()
 	return nil
 }
@@ -161,7 +177,15 @@ func connectPostgreSQL(connectionInfo ConnectionInfo, poolsize int, metrics Metr
 	c.SetMaxIdleConns(poolsize)
 	c.SetMaxOpenConns(poolsize)
 	c.SetConnMaxLifetime(360 * time.Second)
-	return &ExecutePostSQL{Con: c, Metrics: metrics}, nil
+	d, err := sql.Open("postgres", psqlInfo)
+	if err != nil {
+		log.Fatalf("failed to open PostgreSQL connection: %s", err)
+	}
+
+	d.SetMaxIdleConns(poolsize)
+	d.SetMaxOpenConns(poolsize)
+	d.SetConnMaxLifetime(360 * time.Second)
+	return &ExecutePostSQL{Con: c, WCon: d, Metrics: metrics}, nil
 }
 
 func psqlInfoFromConnectionInfo(connectionInfo ConnectionInfo) string {
@@ -237,6 +261,7 @@ func stringInterfaceToPostgreSQLQuery(s interface{}, label string) string {
 	switch label {
 	case "read", "read-404":
 		return fmt.Sprintf("select id,k,c,pad from %s where id='%s';", set[0], set[1])
+		//return "select 1;"
 	}
 	return fmt.Sprintf("INSERT INTO %s(id, k, c , pad) VALUES ('%s','%s','%s','%s');", set[0], set[1], set[2], set[2], set[2])
 
