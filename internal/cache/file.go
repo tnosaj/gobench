@@ -3,6 +3,7 @@ package cache
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -96,7 +97,7 @@ func (fc *FileCache) Load() error {
 	return nil
 }
 
-func (fc *FileCache) Save() error {
+func (fc *FileCache) Save(c context.Context) error {
 	close(fc.Channel)
 
 	logrus.Info("filecache: no data to write")

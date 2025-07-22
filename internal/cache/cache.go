@@ -1,6 +1,7 @@
 package cache
 
 import (
+	"context"
 	"strings"
 
 	"github.com/samborkent/uuid"
@@ -10,7 +11,7 @@ import (
 
 type CacheValues interface {
 	Load() error
-	Save() error
+	Save(context.Context) error
 	GetRandom() (uuid.UUID, error)
 	Put(uuid.UUID) error
 }

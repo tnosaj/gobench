@@ -29,19 +29,6 @@ func MakeSimpleStrategy(s *internal.Settings) *SimpleReadWrite {
 
 	tableName := "sbtest"
 
-	// if action == "run" {
-	// 	count, err := s.DBInterface.ExecStatementWithReturnInt("select count(id) from " + tableName + ";")
-
-	// 	if err != nil {
-	// 		logrus.Fatalf("could not get max id count with error: %q", err)
-	// 	}
-	// 	logrus.Infof("Query from 0 to %d", count)
-	// 	return &SimpleReadWrite{
-	// 		S:          s,
-	// 		MaxIDCount: count,
-	// 		TableName:  tableName,
-	// 	}
-	// }
 	return &SimpleReadWrite{
 		S:          s,
 		MaxIDCount: s.Initialdatasize,
@@ -62,7 +49,7 @@ func (st *SimpleReadWrite) ReturnExistingValues() []string {
 }
 
 func (st *SimpleReadWrite) Shutdown(c context.Context) {
-	st.Shutdown(c)
+	st.S.DBInterface.Shutdown(c)
 }
 
 // CreateCommand do stuffs
@@ -73,10 +60,10 @@ func (st *SimpleReadWrite) RunCommand() {
 	// w:0   - 100
 	switch {
 	case x <= st.S.ReadWriteSplit.Reads:
-		logrus.Debugf("Will perform read")
+		logrus.Trace("Will perform read")
 		st.S.DBInterface.ExecStatement(st.read())
 	default:
-		logrus.Debugf("Will perform write")
+		logrus.Trace("Will perform write")
 		st.S.DBInterface.ExecStatement(st.write())
 	}
 
@@ -85,24 +72,25 @@ func (st *SimpleReadWrite) RunCommand() {
 func (st *SimpleReadWrite) read() (string, string) {
 	switch st.S.Randomizer.Intn(3) {
 	case 0, 1:
-		logrus.Debugf("Will perform getPk")
+		logrus.Trace("Will perform getPk")
 		return st.getPk(), "getPk"
 	default:
-		logrus.Debugf("Will perform getSk")
-		return st.getSk(), "getSk"
+		logrus.Trace("Will perform getSk")
+		//return st.getSk(), "getSk"
+		return st.getPk(), "getPk"
 	}
 }
 
 func (st *SimpleReadWrite) write() (string, string) {
 	switch st.S.Randomizer.Intn(3) {
 	case 0:
-		logrus.Debugf("Will perform insert")
+		logrus.Trace("Will perform insert")
 		return st.create(), "create"
 	case 1:
-		logrus.Debugf("Will perform delete")
+		logrus.Trace("Will perform delete")
 		return st.delete(), "delete"
 	default:
-		logrus.Debugf("Will perform update")
+		logrus.Trace("Will perform update")
 		return st.update(), "update"
 	}
 }

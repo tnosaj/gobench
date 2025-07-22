@@ -48,6 +48,12 @@ func (st *SimpleReadWrite) bulkInsert() {
 	}
 	close(ch)
 	wg.Wait()
+	count, err := st.S.DBInterface.ExecStatementWithReturnInt("select count(id) from " + st.TableName + ";")
+	if err != nil {
+		logrus.Fatalf("could not get max id count with error: %q", err)
+	}
+	st.MaxIDCount = count
+
 }
 
 func dbinsert(s *internal.Settings, tableName string) error {

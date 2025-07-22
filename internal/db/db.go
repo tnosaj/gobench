@@ -49,7 +49,7 @@ func Connect(db string, connectionInfo ConnectionInfo, poolsize int, tls TLSCert
 	databaseRequestDuration := prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Name:    "database_request_duration_seconds",
 		Help:    "Histogram for the runtime of a simple primary key get function.",
-		Buckets: prometheus.LinearBuckets(0.00001, 0.00005, 75),
+		Buckets: prometheus.LinearBuckets(0.0001, 0.005, 75),
 	}, []string{"query"})
 
 	databaseErrorReuests := prometheus.NewCounterVec(
